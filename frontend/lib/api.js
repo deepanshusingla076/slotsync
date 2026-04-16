@@ -13,7 +13,7 @@ async function request(method, path, body = null) {
     method,
     headers: { 'Content-Type': 'application/json' },
   };
-  if (body) options.body = JSON.stringify(body);
+  if (body !== null) options.body = JSON.stringify(body);
 
   const res = await fetch(`${BASE}${path}`, options);
   const data = await res.json();
@@ -43,3 +43,7 @@ export const getBookedSlots       = (date)     => request('GET',  `/bookings/slo
 export const getUpcomingMeetings  = ()         => request('GET',    '/meetings/upcoming');
 export const getPastMeetings      = ()         => request('GET',    '/meetings/past');
 export const cancelMeeting        = (id)       => request('DELETE', `/meetings/${id}`);
+
+// ── Settings ─────────────────────────────────────
+export const getSettings          = ()         => request('GET', '/settings');
+export const updateSettings       = (data)     => request('PUT', '/settings', data);

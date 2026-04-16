@@ -18,6 +18,7 @@ const eventTypeRoutes    = require('./routes/eventTypeRoutes');
 const availabilityRoutes = require('./routes/availabilityRoutes');
 const bookingRoutes      = require('./routes/bookingRoutes');
 const meetingRoutes      = require('./routes/meetingRoutes');
+const settingsRoutes     = require('./routes/settingsRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +35,7 @@ app.use('/event-types',  eventTypeRoutes);
 app.use('/availability', availabilityRoutes);
 app.use('/bookings',     bookingRoutes);
 app.use('/meetings',     meetingRoutes);
+app.use('/settings',     settingsRoutes);
 
 // 404 handler — catches any unrecognized routes
 app.use((req, res) => {

@@ -1,68 +1,66 @@
-// components/MeetingCard.jsx
-// Displays one meeting with invitee info, time, and optional cancel button.
+'use client';
+// MeetingCard — Calendly-style meeting row
 
 import { formatDate, formatTime } from '@/lib/utils';
 
 export default function MeetingCard({ meeting, showCancel, onCancel }) {
-  const isCancelled = meeting.status === 'cancelled';
+  const cancelled = meeting.status === 'cancelled';
+  const isPast    = new Date(meeting.end_time) < new Date() && !cancelled;
 
   return (
-    <div className={`card p-5 flex items-start gap-4 ${isCancelled ? 'opacity-60' : ''}`}>
+    <div className={`card flex items-stretch overflow-hidden transition-all hover:shadow-md ${cancelled ? 'opacity-60' : ''}`}>
 
-      {/* Color stripe */}
+      {/* Left colour stripe */}
       <div
-        className="w-1 self-stretch rounded-full flex-shrink-0"
-        style={{ backgroundColor: meeting.color || '#2563EB' }}
+        className="w-1.5 flex-shrink-0"
+        style={{ backgroundColor: meeting.color || '#006BFF' }}
       />
 
       {/* Main content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {/* Event type label */}
-            <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-0.5">
+      <div className="flex-1 flex items-center gap-4 px-5 py-4 min-w-0">
+
+        {/* Info column */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
               {meeting.event_title}
-            </p>
-            {/* Invitee name */}
-            <h3 className="font-semibold text-gray-900 truncate">{meeting.invitee_name}</h3>
-            {/* Invitee email */}
-            <p className="text-sm text-gray-500 truncate">{meeting.invitee_email}</p>
+            </span>
+            {cancelled ? (
+              <span className="badge-red">Cancelled</span>
+            ) : isPast ? (
+              <span className="badge-gray">Completed</span>
+            ) : (
+              <span className="badge-green">Upcoming</span>
+            )}
           </div>
-
-          {/* Status badge */}
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${
-            isCancelled
-              ? 'bg-red-50 text-red-500'
-              : 'bg-green-50 text-green-600'
-          }`}>
-            {isCancelled ? 'Cancelled' : 'Confirmed'}
-          </span>
+          <h3 className="font-semibold text-gray-900 truncate text-[15px]">
+            {meeting.invitee_name}
+          </h3>
+          <p className="text-sm text-gray-500 truncate mt-0.5">
+            {meeting.invitee_email}
+          </p>
         </div>
 
-        {/* Date, time, duration */}
-        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-          <span className="flex items-center gap-1.5">
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-            </svg>
+        {/* Date/time column */}
+        <div className="text-right flex-shrink-0 hidden sm:block">
+          <p className="text-sm font-semibold text-gray-900">
             {formatDate(meeting.start_time)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" />
-            </svg>
+          </p>
+          <p className="text-sm text-gray-500 mt-0.5">
             {formatTime(meeting.start_time)} · {meeting.duration_minutes} min
-          </span>
+          </p>
         </div>
+
+        {/* Cancel button */}
+        {showCancel && !cancelled && (
+          <button
+            onClick={onCancel}
+            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            Cancel
+          </button>
+        )}
       </div>
-
-      {/* Cancel button */}
-      {showCancel && !isCancelled && (
-        <button onClick={onCancel} className="btn-danger flex-shrink-0">
-          Cancel
-        </button>
-      )}
-
     </div>
   );
 }
