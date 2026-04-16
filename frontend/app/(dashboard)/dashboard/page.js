@@ -1,5 +1,8 @@
 'use client';
-// Dashboard — Event Types (Professional Revert)
+/**
+ * Main Dashboard Page
+ * Displays an overview of user statistics and a list of active event types.
+ */
 
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '@/lib/api';

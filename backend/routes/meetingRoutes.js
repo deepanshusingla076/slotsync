@@ -1,4 +1,7 @@
-// routes/meetingRoutes.js
+/**
+ * Meeting Routes
+ * Defines endpoints for retrieving and managing scheduled meetings.
+ */
 const express = require('express');
 const router  = express.Router();
 const meetingController = require('../controllers/meetingController');

@@ -1,5 +1,8 @@
 'use client';
-// EventTypeModal — Professional Revert
+/**
+ * EventTypeModal Component
+ * Modal interface for creating and editing event types.
+ */
 
 import { useState, useEffect, useRef } from 'react';
 import * as api from '@/lib/api';

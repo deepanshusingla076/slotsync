@@ -27,7 +27,7 @@ const createBooking = async (req, res) => {
   try {
     const { name, email, event_type_id, date, time, notes } = req.body;
 
-    // ── Step 1: Validate input ────────────────────────────────
+    // Step 1: Validate input
     if (!name || !email || !event_type_id || !date || !time) {
       return res.status(400).json({ error: 'name, email, event_type_id, date, and time are required' });
     }
@@ -48,7 +48,7 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ error: 'Invalid time. Use format HH:MM (e.g. 10:00)' });
     }
 
-    // ── Step 2: Fetch the event type ─────────────────────────
+    // Step 2: Fetch the event type
     const eventType = await eventTypeModel.getById(event_type_id);
     if (!eventType) {
       return res.status(404).json({ error: 'Event type not found' });
@@ -57,7 +57,7 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ error: 'This event type is no longer active' });
     }
 
-    // ── Step 3: Build DATETIME strings ───────────────────────
+    // Step 3: Build DATETIME strings
     // MySQL DATETIME format: "YYYY-MM-DD HH:MM:SS"
     const startDateTime = new Date(`${date}T${time}:00`);
     const endDateTime   = new Date(startDateTime.getTime() + eventType.duration_minutes * 60 * 1000);
@@ -70,17 +70,17 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ error: 'Cannot book a slot in the past' });
     }
 
-    // ── Step 4: Get availability for this weekday ─────────────
+    // Step 4: Get availability for this weekday
     // getDay() returns 0 (Sun) to 6 (Sat) — matches our DB schema
     const dayOfWeek = startDateTime.getDay();
     const availability = await availabilityModel.getByDay(dayOfWeek);
 
-    // ── Step 5: Check the day is available ───────────────────
+    // Step 5: Check the day is available
     if (!availability || !availability.is_available) {
       return res.status(400).json({ error: 'The host is not available on this day' });
     }
 
-    // ── Step 6: Check the slot is within working hours ───────
+    // Step 6: Check the slot is within working hours
     // Convert everything to minutes for simple number comparison
     const slotStartMinutes = toMinutes(time);
     const slotEndMinutes   = slotStartMinutes + eventType.duration_minutes;
@@ -93,13 +93,13 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // ── Step 7: Check for overlapping bookings ───────────────
+    // Step 7: Check for overlapping bookings
     const conflict = await bookingModel.hasOverlap(start_time, end_time);
     if (conflict) {
       return res.status(409).json({ error: 'This time slot is already booked. Please choose another.' });
     }
 
-    // ── Step 8: Save the booking ─────────────────────────────
+    // Step 8: Save the booking
     const bookingId = await bookingModel.create({
       event_type_id,
       invitee_name:  name,

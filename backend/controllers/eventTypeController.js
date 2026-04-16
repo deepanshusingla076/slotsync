@@ -31,7 +31,7 @@ const createEventType = async (req, res) => {
   try {
     const { title, description, duration_minutes, color } = req.body;
 
-    // ── Validation ─────────────────────────────
+    // Validation
     if (!title || typeof title !== 'string' || title.trim() === '') {
       return res.status(400).json({ error: 'title is required' });
     }
@@ -39,7 +39,7 @@ const createEventType = async (req, res) => {
       return res.status(400).json({ error: 'duration_minutes must be a positive number' });
     }
 
-    // ── Slug generation + uniqueness check ─────
+    // Slug generation + uniqueness check
     const slug = generateSlug(title);
     const existing = await eventTypeModel.getBySlug(slug);
     if (existing) {

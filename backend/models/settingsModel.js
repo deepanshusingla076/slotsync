@@ -1,5 +1,7 @@
-// models/settingsModel.js
-// Stores app-wide settings: currently just timezone.
+/**
+ * Settings Model
+ * Handles database queries for application-wide user settings.
+ */
 
 const db = require('../config/db');
 

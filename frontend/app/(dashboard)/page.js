@@ -1,5 +1,9 @@
 'use client';
-// Hybrid Landing Page — Clean Hero/Nav, Brutalist Accents for About & Contact
+/**
+ * Landing Page Component
+ * Renders the main entry point for the application, including the hero section,
+ * feature highlights, step-by-step guide, and contact form.
+ */
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -35,7 +39,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       
-      {/* ── CLEAN NAVBAR ── */}
+      {/* Navigation Bar */}
       <nav className="fixed top-0 inset-x-0 h-[72px] bg-white border-b border-gray-200 z-50 flex items-center px-6 md:px-10 justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
@@ -55,7 +59,7 @@ export default function LandingPage() {
         </Link>
       </nav>
 
-      {/* ── CLEAN HERO ── */}
+      {/* Hero Section */}
       <header className="pt-32 pb-24 px-6 md:px-10 bg-gradient-to-b from-blue-50/50 to-white relative overflow-hidden">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
           
@@ -113,7 +117,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── ABOUT ── */}
+      {/* About Section */}
       <section id="about" className="py-24 px-6 md:px-10 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 text-center max-w-3xl mx-auto">
@@ -143,7 +147,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── STEPS (CLEAN PROFESSIONAL) ── */}
+      {/* Steps Section */}
       <section id="steps" className="py-24 px-6 md:px-10 bg-gray-50">
         <div className="max-w-5xl mx-auto text-center mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">How it works</h2>
@@ -163,7 +167,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CONTACT & FEEDBACK ── */}
+      {/* Contact Section */}
       <section id="contact" className="py-24 bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6 md:px-10 flex flex-col md:flex-row gap-16">
           
@@ -228,7 +232,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-12 text-center text-gray-500 text-sm flex flex-col items-center">
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm mb-4">S</div>
         <p>© 2026 SlotSync Platform. Built with Next.js, Tailwind, and Node.js.</p>

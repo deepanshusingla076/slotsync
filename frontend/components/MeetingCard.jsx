@@ -1,5 +1,8 @@
 'use client';
-// MeetingCard — Professional Revert
+/**
+ * MeetingCard Component
+ * Displays individual meeting details in a styled card format.
+ */
 
 import { formatDate, formatTime } from '@/lib/utils';
 

@@ -1,5 +1,8 @@
 'use client';
-// Calendar — Professional Revert
+/**
+ * Calendar Component
+ * Renders an interactive monthly calendar for selecting dates.
+ */
 
 import { useState } from 'react';
 

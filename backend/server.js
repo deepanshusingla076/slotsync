@@ -1,12 +1,9 @@
-// server.js
-// -------------------------------------------------
-// Entry point of the backend. This file:
-//   1. Loads environment variables
-//   2. Creates the Express app
-//   3. Registers middleware (CORS, JSON parsing)
-//   4. Mounts all routes
-//   5. Starts listening on a port
-// -------------------------------------------------
+/**
+ * Server Entry Point
+ * 
+ * Initializes the Express application, configures middleware,
+ * connects to the database, and registers all API routes.
+ */
 
 require('dotenv').config(); // Must be first — loads .env variables
 
@@ -23,7 +20,7 @@ const settingsRoutes     = require('./routes/settingsRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ── Middleware ──────────────────────────────────
+// Middleware Setup
 // cors()         → allows the Next.js frontend to call this API
 // express.json() → parses incoming JSON request bodies
 app.use(cors());
@@ -50,7 +47,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ── Start Server ─────────────────────────────────
+// Server Boot
 app.listen(PORT, () => {
   console.log(`✅ SlotSync API running at http://localhost:${PORT}`);
   console.log(`🔍 Health check → http://localhost:${PORT}/health`);

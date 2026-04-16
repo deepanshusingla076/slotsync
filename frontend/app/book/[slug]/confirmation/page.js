@@ -1,5 +1,8 @@
 'use client';
-// Booking Confirmation — Professional Revert
+/**
+ * Booking Confirmation Page
+ * Displays the details of a successfully scheduled meeting to the user.
+ */
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';

@@ -1,4 +1,7 @@
-// routes/bookingRoutes.js
+/**
+ * Booking Routes
+ * Defines endpoints for processing meeting bookings and retrieving booked slots.
+ */
 const express = require('express');
 const router  = express.Router();
 const bookingController = require('../controllers/bookingController');

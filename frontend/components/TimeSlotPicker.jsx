@@ -1,5 +1,8 @@
 'use client';
-// TimeSlotPicker — Professional Revert
+/**
+ * TimeSlotPicker Component
+ * Renders available time slots for booking and handles user selection.
+ */
 
 export default function TimeSlotPicker({ slots, selectedTime, onSelect, loading }) {
 

@@ -1,5 +1,8 @@
 'use client';
-// EventTypeCard — Professional Revert
+/**
+ * EventTypeCard Component
+ * Displays a summary of an event type and provides quick actions like booking or copying the link.
+ */
 
 import { useState } from 'react';
 import Link from 'next/link';

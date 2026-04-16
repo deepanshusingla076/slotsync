@@ -1,8 +1,7 @@
-// models/eventTypeModel.js
-// -------------------------------------------------
-// All SQL queries for the event_types table live here.
-// Controllers call these functions — no SQL in controllers.
-// -------------------------------------------------
+/**
+ * Event Type Model
+ * Handles database operations for event types, such as fetching, creating, updating, and removing.
+ */
 
 const db = require('../config/db');
 

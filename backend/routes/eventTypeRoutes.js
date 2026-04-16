@@ -1,4 +1,7 @@
-// routes/eventTypeRoutes.js
+/**
+ * Event Type Routes
+ * Defines endpoints for creating, retrieving, updating, and deleting event types.
+ */
 const express = require('express');
 const router  = express.Router();
 const eventTypeController = require('../controllers/eventTypeController');

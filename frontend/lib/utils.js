@@ -1,7 +1,9 @@
-// lib/utils.js
-// -------------------------------------------------
-// Shared helper functions used across pages.
-// -------------------------------------------------
+/**
+ * Utilities Library
+ * 
+ * Provides shared helper functions for date formatting, time manipulation,
+ * and slot generation logic used across the frontend.
+ */
 
 export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

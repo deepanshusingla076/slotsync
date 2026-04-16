@@ -1,8 +1,7 @@
-// models/availabilityModel.js
-// -------------------------------------------------
-// SQL queries for the availability table.
-// One row per day of the week (0=Sun … 6=Sat).
-// -------------------------------------------------
+/**
+ * Availability Model
+ * Handles database queries related to user availability constraints.
+ */
 
 const db = require('../config/db');
 

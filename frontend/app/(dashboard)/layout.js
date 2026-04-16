@@ -1,6 +1,9 @@
 'use client';
-// app/(dashboard)/layout.js
-// Shows sidebar only on internal pages, not on the landing page (/)
+/**
+ * Dashboard Layout
+ * Wraps the dashboard pages with the Sidebar navigation.
+ * Excludes the landing page to provide a full-width experience.
+ */
 
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';

@@ -1,5 +1,8 @@
 'use client';
-// Public Booking Page — Professional Revert
+/**
+ * Public Booking Page
+ * Allows external users to select dates and times to book meetings based on event type availability.
+ */
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';

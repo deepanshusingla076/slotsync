@@ -1,8 +1,7 @@
-// models/bookingModel.js
-// -------------------------------------------------
-// SQL queries for the bookings table.
-// Handles creation, overlap detection, and status.
-// -------------------------------------------------
+/**
+ * Booking Model
+ * Handles database queries for bookings, including overlap detection, retrieval, and cancellations.
+ */
 
 const db = require('../config/db');
 

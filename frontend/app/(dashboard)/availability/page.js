@@ -1,5 +1,8 @@
 'use client';
-// Availability — Professional Revert
+/**
+ * Availability Settings Page
+ * Allows users to configure their weekly availability for receiving bookings.
+ */
 
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '@/lib/api';

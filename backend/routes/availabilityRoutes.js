@@ -1,4 +1,7 @@
-// routes/availabilityRoutes.js
+/**
+ * Availability Routes
+ * Defines endpoints for managing user availability schedules and overrides.
+ */
 const express = require('express');
 const router  = express.Router();
 const availabilityController = require('../controllers/availabilityController');

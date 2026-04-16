@@ -1,5 +1,8 @@
 'use client';
-// Sidebar — Professional Revert
+/**
+ * Sidebar Component
+ * Provides navigation links and user interface controls for the dashboard layout.
+ */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

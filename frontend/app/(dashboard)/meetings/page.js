@@ -1,5 +1,8 @@
 'use client';
-// Meetings page — Professional Revert
+/**
+ * Meetings Dashboard Page
+ * Lists all upcoming and past meetings for the user, with options to manage them.
+ */
 
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '@/lib/api';
