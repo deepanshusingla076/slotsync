@@ -40,8 +40,10 @@ export default function EventTypeModal({ event, onClose, onSave }) {
 
     setSaving(true); setError('');
     try {
-      isEdit ? await api.updateEventType(event.id, form) : await api.createEventType(form);
-      onSave();
+      const savedEvent = isEdit
+        ? await api.updateEventType(event.id, form)
+        : await api.createEventType(form);
+      onSave(savedEvent, isEdit);
     } catch (e) {
       setError(e.message);
       setSaving(false);

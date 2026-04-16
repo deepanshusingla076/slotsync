@@ -31,31 +31,21 @@ export default function TimeSlotPicker({ slots, selectedTime, onSelect, loading 
   return (
     <div className="flex flex-col gap-2 overflow-y-auto max-h-[500px] pr-1 -mr-1">
       {slots.map(slot => (
-        <div key={slot.time} className="flex gap-2">
-          <button
-            onClick={() => slot.available && onSelect(slot.time)}
-            disabled={!slot.available}
-            className={`
-              flex-1 py-3 px-4 rounded-xl text-center font-bold text-[15px] transition-all duration-200 border shrink-0
-              ${selectedTime === slot.time
-                ? 'bg-gray-700 text-white border-gray-700 shadow-md w-[48%]'
-                : slot.available
-                ? 'bg-white border-blue-100 text-[#0066FF] hover:border-[#0066FF] hover:bg-blue-50/50 hover:shadow-sm w-full'
-                : 'bg-gray-50 border-gray-50 text-gray-200 line-through cursor-not-allowed w-full'}
-            `}
-          >
-            {slot.label}
-          </button>
-
-          {selectedTime === slot.time && (
-            <button
-              onClick={() => onSelect(slot.time, true)}
-              className="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-[15px] rounded-xl transition-all duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg"
-            >
-              Next
-            </button>
-          )}
-        </div>
+        <button
+          key={slot.time}
+          onClick={() => slot.available && onSelect(slot.time)}
+          disabled={!slot.available}
+          className={`
+            w-full py-3 px-4 rounded-xl text-center font-bold text-[15px] transition-all duration-200 border
+            ${selectedTime === slot.time
+              ? 'bg-[#0066FF] text-white border-[#0066FF] shadow-md shadow-blue-500/20'
+              : slot.available
+              ? 'bg-white border-blue-100 text-[#0066FF] hover:border-[#0066FF] hover:bg-blue-50/50 hover:shadow-sm'
+              : 'bg-gray-50 border-gray-50 text-gray-200 line-through cursor-not-allowed'}
+          `}
+        >
+          {slot.label}
+        </button>
       ))}
     </div>
   );

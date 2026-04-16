@@ -26,7 +26,7 @@ const getUpcoming = async () => {
      FROM bookings b
      JOIN event_types e ON b.event_type_id = e.id
      WHERE b.status = 'confirmed'
-       AND b.start_time > NOW()
+       AND b.end_time > NOW()
      ORDER BY b.start_time ASC`
   );
   return rows;
@@ -37,7 +37,7 @@ const getPast = async () => {
     `SELECT b.*, e.title AS event_title, e.color, e.duration_minutes
      FROM bookings b
      JOIN event_types e ON b.event_type_id = e.id
-     WHERE b.end_time < NOW()
+     WHERE b.end_time <= NOW()
         OR b.status = 'cancelled'
      ORDER BY b.start_time DESC`
   );

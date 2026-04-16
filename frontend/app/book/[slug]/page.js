@@ -11,6 +11,13 @@ import TimeSlotPicker from '@/components/TimeSlotPicker';
 import * as api       from '@/lib/api';
 import { formatDate, generateTimeSlots } from '@/lib/utils';
 
+const toYmd = (dateObj) => {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 export default function BookingPage() {
   const { slug } = useParams();
   const router   = useRouter();
@@ -23,6 +30,7 @@ export default function BookingPage() {
   const [step,         setStep]         = useState(1); // 1 = dateTime, 2 = form
   
   const [slots,        setSlots]        = useState([]);
+  const [reservedSlots, setReservedSlots] = useState([]);
   const [form,         setForm]         = useState({ name: '', email: '', notes: '' });
 
   const [pageLoading,  setPageLoading]  = useState(true);
@@ -42,21 +50,56 @@ export default function BookingPage() {
     load();
   }, [slug]);
 
-  const handleDateSelect = async (date) => {
+  const handleDateSelect = async (date, autoAssignTime = false) => {
     setSelectedDate(date); setSelectedTime(null); setSlots([]); setSlotsLoading(true); setError('');
     try {
       const { slots: booked } = await api.getBookedSlots(date);
+      setReservedSlots(booked || []);
       const dow = new Date(date + 'T12:00:00').getDay();
       const config = availability.find(a => a.day_of_week === dow);
       if (!config || !config.is_available) { setSlots([]); return; }
-      setSlots(generateTimeSlots(String(config.start_time).substring(0, 5), String(config.end_time).substring(0, 5), eventType.duration_minutes, booked));
+      const generated = generateTimeSlots(
+        String(config.start_time).substring(0, 5),
+        String(config.end_time).substring(0, 5),
+        eventType.duration_minutes,
+        booked
+      );
+      setSlots(generated);
+
+      if (autoAssignTime) {
+        const firstAvailable = generated.find((s) => s.available);
+        if (firstAvailable) {
+          setSelectedTime(firstAvailable.time);
+        }
+      }
     } catch (err) { setError(err.message); } finally { setSlotsLoading(false); }
   };
 
-  const handleTimeSelect = (time, confirm = false) => {
+  const handleTimeSelect = (time) => {
     setSelectedTime(time);
-    if (confirm) setStep(2);
+    setStep(2);
   };
+
+  useEffect(() => {
+    const autoPickFirstAvailableDate = async () => {
+      if (!eventType || availability.length === 0 || selectedDate) return;
+
+      for (let i = 0; i < 45; i += 1) {
+        const d = new Date();
+        d.setHours(12, 0, 0, 0);
+        d.setDate(d.getDate() + i);
+        const dow = d.getDay();
+        const dayConfig = availability.find(a => a.day_of_week === dow);
+
+        if (dayConfig && dayConfig.is_available) {
+          await handleDateSelect(toYmd(d), true);
+          break;
+        }
+      }
+    };
+
+    autoPickFirstAvailableDate();
+  }, [eventType, availability, selectedDate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true); setError('');
@@ -168,20 +211,52 @@ export default function BookingPage() {
                   <Calendar availability={availability} selectedDate={selectedDate} onDateSelect={handleDateSelect} />
                 </div>
 
-                {selectedDate && (
-                  <div className="w-full lg:w-[240px] animate-slide-in-right">
-                    <p className="text-[15px] font-bold text-gray-900 mb-4 h-[32px] flex items-center">
-                      {formatDate(selectedDate)}
-                    </p>
-                    <TimeSlotPicker slots={slots} selectedTime={selectedTime} onSelect={handleTimeSelect} loading={slotsLoading} />
-                  </div>
-                )}
+                <div className="w-full lg:w-[240px] animate-slide-in-right">
+                  <p className="text-[15px] font-bold text-gray-900 mb-4 h-[32px] flex items-center">
+                    {selectedDate ? formatDate(selectedDate) : 'Select a date'}
+                  </p>
+                  {selectedDate ? (
+                    <>
+                      <TimeSlotPicker slots={slots} selectedTime={selectedTime} onSelect={handleTimeSelect} loading={slotsLoading} />
+
+                      {!slotsLoading && reservedSlots.length > 0 && (
+                        <div className="mt-5 pt-4 border-t border-gray-100">
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Reserved</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {reservedSlots.map((t) => (
+                              <span key={t} className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-500 font-semibold">
+                                {fmtTime(t)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center py-12 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl">
+                      <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mb-3">
+                        <svg width="22" height="22" fill="none" stroke="#D1D5DB" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">Choose your date</p>
+                      <p className="text-xs text-gray-400">Available time slots will appear here.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
             /* STEP 2: Form */
             <div className="h-full max-w-[440px] animate-slide-in-right pt-2 md:pt-0">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Enter Details</h2>
+              <div className="flex items-center justify-between mb-6 gap-3">
+                <h2 className="text-xl font-bold text-gray-900">Enter Details</h2>
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="text-sm font-semibold text-[#0066FF] hover:underline"
+                >
+                  Change date & time
+                </button>
+              </div>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="label">Name *</label>

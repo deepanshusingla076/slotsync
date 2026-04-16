@@ -127,7 +127,19 @@ function DashboardContent() {
         </div>
       </div>
 
-      {showModal && <EventTypeModal event={editing} onClose={() => setShowModal(false)} onSave={() => { load(); setShowModal(false); }} />}
+      {showModal && (
+        <EventTypeModal
+          event={editing}
+          onClose={() => setShowModal(false)}
+          onSave={async (savedEvent, isEdit) => {
+            setShowModal(false);
+            await load();
+            if (!isEdit && savedEvent?.slug) {
+              router.push(`/book/${savedEvent.slug}`);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

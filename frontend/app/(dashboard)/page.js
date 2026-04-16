@@ -22,6 +22,7 @@ const FEATURES = [
     desc: 'Create custom event types with unique durations, colors, and shareable booking links.',
     gradient: 'from-blue-500 to-indigo-600',
     bg: 'bg-blue-50',
+    iconColor: 'text-blue-600',
   },
   {
     icon: <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
@@ -29,6 +30,7 @@ const FEATURES = [
     desc: 'Set your weekly schedule once. SlotSync prevents double-bookings automatically.',
     gradient: 'from-emerald-500 to-teal-600',
     bg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
   },
   {
     icon: <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
@@ -36,6 +38,7 @@ const FEATURES = [
     desc: 'No sign-ups, no credit cards. Share a link and start getting booked immediately.',
     gradient: 'from-amber-500 to-orange-600',
     bg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
   },
 ];
 
@@ -191,7 +194,7 @@ export default function LandingPage() {
             {FEATURES.map((card, i) => (
               <div key={i} className="card p-7 flex flex-col group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
                 <div className={`w-12 h-12 ${card.bg} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                  <span className={`bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`}>
+                  <span className={card.iconColor}>
                     {card.icon}
                   </span>
                 </div>
