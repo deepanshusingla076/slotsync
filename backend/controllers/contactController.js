@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 exports.submitContact = async (req, res) => {
   try {
-    const { type, email, message } = req.body;
+    const { type, email, message, name, rating, topic } = req.body;
 
     if (!email || !message) {
       return res.status(400).json({ error: 'Email and message are required' });
@@ -20,7 +20,7 @@ exports.submitContact = async (req, res) => {
 
     const subject = type === 'feedback' 
       ? `SlotSync Feedback from ${email}` 
-      : `SlotSync Contact from ${email}`;
+      : `SlotSync Contact from ${name || email}`;
 
     const mailOptions = {
       from: '"SlotSync Platform" <deepanshusingla0746@gmail.com>',
@@ -30,10 +30,13 @@ exports.submitContact = async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
           <div style="background-color: #006BFF; padding: 20px; color: white;">
-            <h2 style="margin: 0;">New ${type === 'feedback' ? 'Feature Request' : 'Contact Message'}</h2>
+            <h2 style="margin: 0;">New ${type === 'feedback' ? 'Feedback/Request' : 'Contact Message'}</h2>
           </div>
           <div style="padding: 24px; background-color: #f8fafc;">
+            ${name ? `<p><strong>Name:</strong> ${name}</p>` : ''}
             <p><strong>From:</strong> ${email}</p>
+            ${type === 'feedback' && rating ? `<p><strong>Rating:</strong> ${rating} / 5</p>` : ''}
+            ${type === 'feedback' && topic ? `<p><strong>Topic:</strong> ${topic}</p>` : ''}
             <p><strong>Message:</strong></p>
             <div style="background-color: white; padding: 16px; border: 1px solid #e2e8f0; border-radius: 6px; white-space: pre-wrap;">${message}</div>
           </div>

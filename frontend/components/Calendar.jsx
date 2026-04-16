@@ -52,33 +52,33 @@ export default function Calendar({ availability = [], selectedDate, onDateSelect
         <h3 className="text-[17px] font-bold text-gray-900">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h3>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <button
             onClick={prevMonth}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-[#006BFF] hover:bg-blue-100 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
           >
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <button
             onClick={nextMonth}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-[#006BFF] hover:bg-blue-100 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
           >
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
       </div>
 
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 mb-4">
+      <div className="grid grid-cols-7 mb-3">
         {DAYS.map(d => (
-          <div key={d} className="text-center text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
+          <div key={d} className="text-center text-[11px] font-bold text-gray-300 uppercase tracking-wider">
             {d}
           </div>
         ))}
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 gap-y-2 gap-x-1">
+      <div className="grid grid-cols-7 gap-y-1.5 gap-x-1">
         {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
 
         {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -94,11 +94,11 @@ export default function Calendar({ availability = [], selectedDate, onDateSelect
               <button
                 disabled={!available || past}
                 onClick={() => available && onDateSelect(dateStr)}
-                className={`w-[44px] h-[44px] flex items-center justify-center rounded-full text-[15px] font-bold transition-all
-                  ${selected ? 'bg-[#006BFF] text-white shadow-md' : 
-                    available && !past ? 'bg-[#EBF2FF] text-[#006BFF] hover:bg-blue-100' : 
-                    'text-gray-300 opacity-50 cursor-not-allowed'}
-                  ${today && !selected && available ? 'ring-2 ring-offset-2 ring-[#006BFF]' : ''}
+                className={`w-[42px] h-[42px] flex items-center justify-center rounded-xl text-[14px] font-semibold transition-all duration-200
+                  ${selected ? 'bg-[#0066FF] text-white shadow-md shadow-blue-500/20 scale-105' : 
+                    available && !past ? 'bg-blue-50/60 text-[#0066FF] hover:bg-blue-100 hover:scale-105' : 
+                    'text-gray-200 cursor-not-allowed'}
+                  ${today && !selected && available ? 'ring-2 ring-offset-1 ring-[#0066FF]/40' : ''}
                 `}
               >
                 {day}

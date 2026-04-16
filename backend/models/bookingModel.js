@@ -1,42 +1,27 @@
-/**
- * Booking Model
- * Handles database queries for bookings, including overlap detection, retrieval, and cancellations.
- */
+﻿const db = require('../config/db');
 
-const db = require('../config/db');
-
-// Check if a new slot overlaps any existing CONFIRMED booking.
-//
-// Overlap condition (standard interval overlap formula):
-//   existing.start_time < new_end  AND  existing.end_time > new_start
-//
-// This catches ALL overlap cases:
-//   - exact duplicate times
-//   - partial overlaps (e.g. 10:00–10:30 vs 10:15–10:45)
 const hasOverlap = async (start_time, end_time) => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT id FROM bookings
      WHERE status = 'confirmed'
-       AND start_time < ?
-       AND end_time   > ?`,
+       AND start_time < $1
+       AND end_time   > $2`,
     [end_time, start_time]
   );
-  return rows.length > 0; // true = conflict exists
+  return rows.length > 0;
 };
 
-// Insert a new confirmed booking
 const create = async ({ event_type_id, invitee_name, invitee_email, start_time, end_time, notes }) => {
-  const [result] = await db.query(
+  const { rows } = await db.query(
     `INSERT INTO bookings (event_type_id, invitee_name, invitee_email, start_time, end_time, notes)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
     [event_type_id, invitee_name, invitee_email, start_time, end_time, notes || null]
   );
-  return result.insertId;
+  return rows[0].id;
 };
 
-// Upcoming: confirmed bookings in the future
 const getUpcoming = async () => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT b.*, e.title AS event_title, e.color, e.duration_minutes
      FROM bookings b
      JOIN event_types e ON b.event_type_id = e.id
@@ -47,9 +32,8 @@ const getUpcoming = async () => {
   return rows;
 };
 
-// Past: bookings that have already ended OR were cancelled
 const getPast = async () => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT b.*, e.title AS event_title, e.color, e.duration_minutes
      FROM bookings b
      JOIN event_types e ON b.event_type_id = e.id
@@ -60,27 +44,23 @@ const getPast = async () => {
   return rows;
 };
 
-// Soft delete — marks booking as cancelled instead of removing the row
-// This preserves history and keeps the audit trail intact
 const cancelById = async (id) => {
-  const [result] = await db.query(
-    `UPDATE bookings SET status = 'cancelled' WHERE id = ? AND status = 'confirmed'`,
+  const { rowCount } = await db.query(
+    `UPDATE bookings SET status = 'cancelled' WHERE id = $1 AND status = 'confirmed'`,
     [id]
   );
-  return result.affectedRows; // 0 = not found or already cancelled
+  return rowCount;
 };
 
-// Returns an array of booked start times (HH:MM) for a specific date
-// Used by the booking page to know which slots are already taken
 const getBookedStartTimes = async (date) => {
-  const [rows] = await db.query(
-    `SELECT TIME_FORMAT(start_time, '%H:%i') AS booked_time
+  const { rows } = await db.query(
+    `SELECT to_char(start_time, 'HH24:MI') AS booked_time
      FROM bookings
-     WHERE DATE(start_time) = ?
+     WHERE DATE(start_time) = $1
        AND status = 'confirmed'`,
     [date]
   );
-  return rows.map(r => r.booked_time); // e.g. ['10:00', '14:30']
+  return rows.map(r => r.booked_time);
 };
 
 module.exports = { hasOverlap, create, getUpcoming, getPast, cancelById, getBookedStartTimes };

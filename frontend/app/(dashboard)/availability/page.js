@@ -64,8 +64,8 @@ export default function AvailabilityPage() {
   );
 
   return (
-    <div className="min-h-full flex flex-col bg-gray-50/50">
-      
+    <div className="min-h-full flex flex-col bg-gray-50/30">
+
       {/* Header */}
       <div className="page-header">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -73,8 +73,13 @@ export default function AvailabilityPage() {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Settings</p>
             <h1 className="text-2xl font-bold text-gray-900">Availability</h1>
           </div>
-          <div className="flex items-center gap-4">
-            {success && <span className="text-sm font-semibold text-emerald-600">Saved successfully</span>}
+          <div className="flex items-center gap-3">
+            {success && (
+              <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1.5 animate-fade-in">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Saved
+              </span>
+            )}
             <button onClick={handleSave} disabled={saving} className="btn-primary rounded-full px-6">
               {saving ? 'Saving...' : 'Save changes'}
             </button>
@@ -83,19 +88,29 @@ export default function AvailabilityPage() {
       </div>
 
       {/* Body */}
-      <div className="flex-1 px-8 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="flex-1 px-4 sm:px-8 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
 
           {error && (
-            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 animate-fade-in">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               <span>{error}</span>
             </div>
           )}
 
-          <div className="card p-6">
-            <h2 className="text-base font-bold text-gray-900 mb-1">Timezone</h2>
-            <p className="text-sm text-gray-500 mb-4">Set your base timezone. Clients will see times converted automatically.</p>
+          <div className="card p-6 animate-fade-in-up">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Timezone</h2>
+                <p className="text-sm text-gray-400">Clients will see times converted automatically</p>
+              </div>
+            </div>
             <div className="max-w-sm">
               <select value={timezone} onChange={e => setTimezone(e.target.value)} className="select-field">
                 {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>)}
@@ -103,22 +118,30 @@ export default function AvailabilityPage() {
             </div>
           </div>
 
-          <div className="card overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-              <h2 className="text-base font-bold text-gray-900">Weekly hours</h2>
+          <div className="card overflow-hidden animate-fade-in-up stagger-1">
+            <div className="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Weekly hours</h2>
+                <p className="text-sm text-gray-400">Set when you&apos;re available for meetings</p>
+              </div>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-50">
               {days.map((day, index) => (
-                <div key={day.day_of_week} className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
-                  
+                <div key={day.day_of_week} className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
+
                   <div className="flex items-center w-full sm:w-48 shrink-0 gap-3">
                     <button
                       onClick={() => toggle(index)}
-                      className={`toggle-track ${day.is_available ? 'bg-blue-600' : 'bg-gray-200'}`} aria-checked={day.is_available}
+                      className={`toggle-track ${day.is_available ? 'bg-[#0066FF]' : 'bg-gray-200'}`} aria-checked={day.is_available}
                     >
-                      <span className={`toggle-thumb ${day.is_available ? 'translate-x-[22px]' : ''}`} />
+                      <span className={`toggle-thumb ${day.is_available ? 'translate-x-5' : ''}`} />
                     </button>
-                    <span className={`text-[15px] font-semibold w-24 ${day.is_available ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <span className={`text-[15px] font-semibold w-28 ${day.is_available ? 'text-gray-900' : 'text-gray-300'}`}>
                       {DAY_NAMES[day.day_of_week]}
                     </span>
                   </div>
@@ -128,16 +151,16 @@ export default function AvailabilityPage() {
                       <div className="flex items-center gap-3">
                         <input
                           type="time" value={day.start_time} onChange={e => setTime(index, 'start_time', e.target.value)}
-                          className="field !w-32 !py-2 text-center"
+                          className="field !w-32 !py-2 text-center !rounded-xl"
                         />
-                        <span className="text-gray-400 font-medium">-</span>
+                        <span className="text-gray-300 font-medium">–</span>
                         <input
                           type="time" value={day.end_time} onChange={e => setTime(index, 'end_time', e.target.value)}
-                          className="field !w-32 !py-2 text-center"
+                          className="field !w-32 !py-2 text-center !rounded-xl"
                         />
                       </div>
                     ) : (
-                      <span className="text-[15px] text-gray-400 font-medium">Unavailable</span>
+                      <span className="text-[15px] text-gray-300 font-medium">Unavailable</span>
                     )}
                   </div>
                 </div>

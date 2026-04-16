@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: slotsync-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    preDeployCommand: npm run db:init
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: slotsync-db
+          property: connectionString
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://slotsync-backend.onrender.com"
+  - type: psql
+    name: slotsync-db
+    databaseName: slotsync
+    user: slotsync_user
+    plan: free

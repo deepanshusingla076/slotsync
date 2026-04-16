@@ -7,54 +7,115 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const MAIN_NAV = [
+  {
+    href: '/dashboard',
+    label: 'Scheduling',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+    ),
+  },
+  {
+    href: '/meetings',
+    label: 'Meetings',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+    ),
+  },
+  {
+    href: '/availability',
+    label: 'Availability',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    ),
+  }
+];
+
+const BOTTOM_NAV = [
+  {
+    href: '/settings',
+    label: 'Settings',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    ),
+  }
+];
+
 export default function Sidebar() {
   const path = usePathname();
 
-  const links = [
-    { href: '/dashboard', label: 'Event Types' },
-    { href: '/availability', label: 'Availability' },
-    { href: '/meetings', label: 'Scheduled Events' },
-  ];
-
   return (
-    <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full">
+    <aside className="w-full md:w-[260px] flex-shrink-0 bg-white border-t md:border-t-0 md:border-r border-gray-200 flex flex-row md:flex-col fixed bottom-0 left-0 md:relative z-20 h-16 md:h-full">
 
-      <Link href="/" className="flex items-center gap-2 p-6 flex-shrink-0">
-        <div className="w-8 h-8 bg-[#006BFF] rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-          S
-        </div>
-        <span className="font-bold text-xl tracking-tight text-gray-900">SlotSync</span>
-      </Link>
+      <div className="hidden md:flex justify-between items-center px-6 py-5 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[#0066FF] font-bold text-lg">
+            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2.5">
+               <rect x="3" y="4" width="18" height="18" rx="2" />
+               <path d="M3 10h18M8 2v4M16 2v4" />
+            </svg>
+          </div>
+          <span className="font-bold text-xl tracking-tight text-[#0066FF]">SlotSync</span>
+        </Link>
+        <button className="text-gray-400 hover:text-gray-600">
+           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+        </button>
+      </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-        {links.map(l => {
+      <div className="hidden md:block px-4 mb-2">
+         <Link href="/dashboard?create=true" className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Create
+         </Link>
+      </div>
+
+      <nav className="flex-1 flex flex-row md:flex-col justify-around md:justify-start items-center md:items-stretch overflow-y-auto px-2 md:px-3 py-0 md:py-1 space-y-0 md:space-y-[2px] overflow-x-auto w-full">
+        {MAIN_NAV.map(l => {
           const active = path === l.href;
           return (
             <Link
               key={l.href}
               href={l.href}
-              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                active 
-                  ? 'bg-blue-50 text-[#006BFF]' 
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+              className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-3 px-2 md:px-3 py-3 md:py-2.5 md:rounded-lg text-xs md:text-[14px] font-medium transition-all duration-200 whitespace-nowrap ${
+                active
+                  ? 'text-[#0066FF] md:bg-[#EBF3FF]'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-t-2 border-transparent md:border-none'
               }`}
             >
+              <span className={`hidden md:block transition-colors ${active ? 'text-[#0066FF]' : 'text-gray-500'}`}>
+                {l.icon}
+              </span>
               {l.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold border border-gray-200">
-            D
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">Default User</p>
-            <p className="text-xs text-gray-500 truncate">Admin</p>
-          </div>
-        </div>
+      <div className="hidden md:block px-3 py-4 border-t border-gray-100 space-y-[2px]">
+        {BOTTOM_NAV.map(l => (
+           <Link
+              key={l.href}
+              href={l.href}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            >
+              <span className="text-gray-500">
+                {l.icon}
+              </span>
+              {l.label}
+            </Link>
+        ))}
       </div>
     </aside>
   );

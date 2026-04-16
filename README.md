@@ -6,18 +6,19 @@ A **production-ready scheduling application** built as a placement assignment. C
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer    | Technology                                |
+| -------- | ----------------------------------------- |
 | Frontend | Next.js 15 (App Router) + Tailwind CSS v4 |
-| Backend  | Node.js + Express.js |
-| Database | MySQL (raw SQL, mysql2 driver) |
-| Fonts | Inter (Google Fonts) |
+| Backend  | Node.js + Express.js                      |
+| Database | PostgreSQL (pg driver)                    |
+| Fonts    | Inter (Google Fonts)                      |
 
 ---
 
 ## ✨ Features
 
 ### Event Types
+
 - Create, edit, delete event types
 - Custom name, duration, colour
 - Auto-generated unique slug
@@ -25,12 +26,14 @@ A **production-ready scheduling application** built as a placement assignment. C
 - Public booking link: `/book/{slug}`
 
 ### Availability
+
 - Set weekly schedule (Monday–Sunday)
 - Per-day time ranges (e.g. 9 AM – 5 PM)
 - Timezone selector
 - Persisted to database
 
 ### Public Booking Page (`/book/{slug}`)
+
 - Calendly-faithful 3-step flow: **Calendar → Time Slots → Form**
 - Back buttons at every step
 - Prevents double-booking with overlap detection
@@ -38,6 +41,7 @@ A **production-ready scheduling application** built as a placement assignment. C
 - Confirmation page after booking
 
 ### Meetings Dashboard
+
 - Upcoming and past meetings tabs
 - Cancel a meeting (soft-delete)
 - Cancelled meetings move to the Past tab
@@ -50,7 +54,7 @@ A **production-ready scheduling application** built as a placement assignment. C
 slotsync/
 ├── backend/                   # Express API
 │   ├── config/
-│   │   └── db.js              # MySQL connection pool
+│   │   └── db.js              # PostgreSQL connection pool
 │   ├── controllers/
 │   │   ├── eventTypeController.js
 │   │   ├── availabilityController.js
@@ -112,33 +116,34 @@ slotsync/
 
 ## 🚀 Getting Started
 
-### 1. Set up MySQL
+### 1. Configure PostgreSQL (Render)
 
-Make sure MySQL is running locally. Then run:
-
-```bash
-mysql -u root -p < database/schema.sql
-```
-
-This creates the `slotsync` database, all tables, and seeds sample data.
+Create a PostgreSQL database on Render and copy the external connection string.
 
 ### 2. Configure Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your MySQL credentials
+# Edit .env with your PostgreSQL connection string
 ```
 
 `.env` format:
+
 ```
 PORT=5000
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=slotsync
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB_NAME"
 ```
+
+Then initialize tables and seed data:
+
+```bash
+cd backend
+npm install
+npm run db:init
+```
+
+For Render deployment via Blueprint, schema setup runs automatically using preDeployCommand in render.yaml.
 
 ### 3. Start Backend
 
@@ -155,7 +160,8 @@ Health check: `http://localhost:5000/health`
 
 ```bash
 cd frontend
-# .env.local is already set to http://localhost:5000
+# Create or update .env.local
+echo NEXT_PUBLIC_API_URL=http://localhost:5000 > .env.local
 ```
 
 ### 5. Start Frontend
@@ -172,57 +178,63 @@ App runs at: `http://localhost:3000`
 
 ## 🌐 Pages
 
-| URL | Description |
-|-----|-------------|
-| `/` → `/dashboard` | Event Types list (redirect) |
-| `/dashboard` | Manage event types |
-| `/availability` | Set weekly availability hours |
-| `/meetings` | View & cancel meetings |
-| `/book/{slug}` | Public booking page (no login) |
-| `/book/{slug}/confirmation` | Booking confirmed screen |
+| URL                         | Description                    |
+| --------------------------- | ------------------------------ |
+| `/` → `/dashboard`          | Event Types list (redirect)    |
+| `/dashboard`                | Manage event types             |
+| `/availability`             | Set weekly availability hours  |
+| `/meetings`                 | View & cancel meetings         |
+| `/book/{slug}`              | Public booking page (no login) |
+| `/book/{slug}/confirmation` | Booking confirmed screen       |
 
 ---
 
 ## 🔌 API Endpoints
 
 ### Event Types
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/event-types` | List all event types |
-| POST | `/event-types` | Create event type |
-| PUT | `/event-types/:id` | Update event type |
-| DELETE | `/event-types/:id` | Delete event type |
-| GET | `/event-types/slug/:slug` | Get by slug (for booking page) |
+
+| Method | Endpoint                  | Description                    |
+| ------ | ------------------------- | ------------------------------ |
+| GET    | `/event-types`            | List all event types           |
+| POST   | `/event-types`            | Create event type              |
+| PUT    | `/event-types/:id`        | Update event type              |
+| DELETE | `/event-types/:id`        | Delete event type              |
+| GET    | `/event-types/slug/:slug` | Get by slug (for booking page) |
 
 ### Availability
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/availability` | Get all 7 days |
-| POST | `/availability` | Save/upsert all days |
+
+| Method | Endpoint        | Description          |
+| ------ | --------------- | -------------------- |
+| GET    | `/availability` | Get all 7 days       |
+| POST   | `/availability` | Save/upsert all days |
 
 ### Bookings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/bookings` | Create a booking (with full validation) |
-| GET | `/bookings/slots?date=YYYY-MM-DD` | Get booked times for a date |
+
+| Method | Endpoint                          | Description                             |
+| ------ | --------------------------------- | --------------------------------------- |
+| POST   | `/bookings`                       | Create a booking (with full validation) |
+| GET    | `/bookings/slots?date=YYYY-MM-DD` | Get booked times for a date             |
 
 ### Meetings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/meetings/upcoming` | Upcoming confirmed meetings |
-| GET | `/meetings/past` | Past/cancelled meetings |
-| DELETE | `/meetings/:id` | Cancel a meeting |
+
+| Method | Endpoint             | Description                 |
+| ------ | -------------------- | --------------------------- |
+| GET    | `/meetings/upcoming` | Upcoming confirmed meetings |
+| GET    | `/meetings/past`     | Past/cancelled meetings     |
+| DELETE | `/meetings/:id`      | Cancel a meeting            |
 
 ### Settings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/settings` | Get timezone setting |
-| PUT | `/settings` | Update timezone |
+
+| Method | Endpoint    | Description          |
+| ------ | ----------- | -------------------- |
+| GET    | `/settings` | Get timezone setting |
+| PUT    | `/settings` | Update timezone      |
 
 ### Health
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Server health check |
+
+| Method | Endpoint  | Description         |
+| ------ | --------- | ------------------- |
+| GET    | `/health` | Server health check |
 
 ---
 
@@ -237,6 +249,7 @@ user_settings  -- id, timezone
 ```
 
 **Double-booking prevention:**
+
 - Application-level overlap check in `bookingController.js` (Step 7)
 - Detects ALL overlap patterns including partial overlaps
 - Only blocks `confirmed` bookings — cancelled slots can be rebooked
@@ -255,10 +268,10 @@ user_settings  -- id, timezone
 
 ## 🖥 Screenshots
 
-| Dashboard | Booking Page | Availability |
-|-----------|-------------|--------------|
+| Dashboard                         | Booking Page        | Availability        |
+| --------------------------------- | ------------------- | ------------------- |
 | Event types grid with colour dots | 3-step booking flow | Weekly hours toggle |
 
 ---
 
-*Built with ❤️ as a placement assignment — SlotSync, a Calendly Clone.*
+_Built with ❤️ as a placement assignment — SlotSync, a Calendly Clone._
