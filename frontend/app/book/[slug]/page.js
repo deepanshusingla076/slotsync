@@ -1,7 +1,5 @@
 'use client';
-// app/book/[slug]/page.js
-// Public booking page — no login required.
-// Flow: Calendar → Time Slots → Booking Form → Confirmation
+// Public Booking Page — Professional Revert
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -14,366 +12,183 @@ export default function BookingPage() {
   const { slug } = useParams();
   const router   = useRouter();
 
-  // ── Server data ────────────────────────────────
   const [eventType,    setEventType]    = useState(null);
   const [availability, setAvailability] = useState([]);
-
-  // ── User selections ────────────────────────────
-  const [selectedDate, setSelectedDate] = useState(null);  // "YYYY-MM-DD"
-  const [selectedTime, setSelectedTime] = useState(null);  // "HH:MM"
+  
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [step,         setStep]         = useState(1); // 1 = dateTime, 2 = form
+  
   const [slots,        setSlots]        = useState([]);
+  const [form,         setForm]         = useState({ name: '', email: '', notes: '' });
 
-  // ── Form ───────────────────────────────────────
-  const [form, setForm] = useState({ name: '', email: '', notes: '' });
-
-  // ── UI state ───────────────────────────────────
   const [pageLoading,  setPageLoading]  = useState(true);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [submitting,   setSubmitting]   = useState(false);
   const [error,        setError]        = useState('');
   const [pageError,    setPageError]    = useState('');
 
-  // ── Load event type + availability ────────────
   useEffect(() => {
     const load = async () => {
       try {
-        const [et, avail] = await Promise.all([
-          api.getEventTypeBySlug(slug),
-          api.getAvailability(),
-        ]);
-        if (!et.is_active) {
-          setPageError('This event type is no longer accepting bookings.');
-          return;
-        }
-        setEventType(et);
-        setAvailability(avail);
-      } catch (err) {
-        setPageError(err.message);
-      } finally {
-        setPageLoading(false);
-      }
+        const [et, avail] = await Promise.all([api.getEventTypeBySlug(slug), api.getAvailability()]);
+        if (!et.is_active) { setPageError('This booking link is currently inactive.'); return; }
+        setEventType(et); setAvailability(avail);
+      } catch (err) { setPageError(err.message); } finally { setPageLoading(false); }
     };
     load();
   }, [slug]);
 
-  // ── When date selected, load time slots ────────
   const handleDateSelect = async (date) => {
-    setSelectedDate(date);
-    setSelectedTime(null);
-    setSlots([]);
-    setSlotsLoading(true);
-    setError('');
-
+    setSelectedDate(date); setSelectedTime(null); setSlots([]); setSlotsLoading(true); setError('');
     try {
-      const { slots: bookedTimes } = await api.getBookedSlots(date);
-
-      const dow      = new Date(date + 'T12:00:00').getDay();
-      const dayAvail = availability.find(a => a.day_of_week === dow);
-
-      if (!dayAvail || !dayAvail.is_available) {
-        setSlots([]);
-        return;
-      }
-
-      // MySQL TIME: "09:00:00" → trim to "09:00"
-      const trim = (t) => String(t).substring(0, 5);
-      const generated = generateTimeSlots(
-        trim(dayAvail.start_time),
-        trim(dayAvail.end_time),
-        eventType.duration_minutes,
-        bookedTimes
-      );
-      setSlots(generated);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSlotsLoading(false);
-    }
+      const { slots: booked } = await api.getBookedSlots(date);
+      const dow = new Date(date + 'T12:00:00').getDay();
+      const config = availability.find(a => a.day_of_week === dow);
+      if (!config || !config.is_available) { setSlots([]); return; }
+      setSlots(generateTimeSlots(String(config.start_time).substring(0, 5), String(config.end_time).substring(0, 5), eventType.duration_minutes, booked));
+    } catch (err) { setError(err.message); } finally { setSlotsLoading(false); }
   };
 
-  // ── Reset to calendar ─────────────────────────
-  const resetDate = () => {
-    setSelectedDate(null);
-    setSelectedTime(null);
-    setSlots([]);
-    setError('');
+  const handleTimeSelect = (time, confirm = false) => {
+    setSelectedTime(time);
+    if (confirm) setStep(2);
   };
 
-  // ── Reset to time slots ───────────────────────
-  const resetTime = () => {
-    setSelectedTime(null);
-    setError('');
-  };
-
-  // ── Submit booking ─────────────────────────────
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError('');
+    e.preventDefault(); setSubmitting(true); setError('');
     try {
-      await api.createBooking({
-        name:          form.name,
-        email:         form.email,
-        event_type_id: eventType.id,
-        date:          selectedDate,
-        time:          selectedTime,
-        notes:         form.notes,
-      });
-
-      const params = new URLSearchParams({
-        name:     form.name,
-        email:    form.email,
-        event:    eventType.title,
-        date:     selectedDate,
-        time:     selectedTime,
-        duration: eventType.duration_minutes,
-      });
+      await api.createBooking({ ...form, event_type_id: eventType.id, date: selectedDate, time: selectedTime });
+      const params = new URLSearchParams({ name: form.name, email: form.email, event: eventType.title, date: selectedDate, time: selectedTime, duration: eventType.duration_minutes });
       router.push(`/book/${slug}/confirmation?${params}`);
-    } catch (err) {
-      setError(err.message);
-      setSubmitting(false);
-    }
+    } catch (err) { setError(err.message); setSubmitting(false); }
   };
 
-  // ── Loading screen ─────────────────────────────
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" style={{ borderWidth: '3px' }} />
-          <p className="text-sm text-gray-500">Loading booking page…</p>
-        </div>
-      </div>
-    );
-  }
+  if (pageLoading) return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50"><div className="spinner-blue" /></div>;
 
-  // ── Error / not found screen ───────────────────
-  if (pageError || !eventType) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <svg width="28" height="28" fill="none" stroke="#EF4444" strokeWidth="1.75" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Page not found</h1>
-          <p className="text-gray-500 text-sm mb-6">
-            {pageError || 'This booking link may be invalid or the event type has been removed.'}
-          </p>
-          <a href="/" className="btn-primary">Go Home</a>
+  if (pageError || !eventType) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg width="24" height="24" fill="none" stroke="#EF4444" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Unavailable</h1>
+        <p className="text-gray-500">{pageError || 'Event not found.'}</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // ── Format time helper ─────────────────────────
   const fmtTime = (t) => new Date(`2000-01-01T${t}:00`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
-    <div className="min-h-screen bg-white lg:flex">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      
+      {/* Container */}
+      <div className="bg-white rounded-xl shadow-xl shadow-gray-200/40 border border-gray-200 flex flex-col md:flex-row w-full max-w-[1060px] min-h-[600px] overflow-hidden">
 
-      {/* ══ LEFT PANEL — Event Info ═══════════════ */}
-      <aside className="lg:w-80 xl:w-96 bg-gray-50 border-r border-gray-200 lg:min-h-screen p-8 lg:p-10 flex flex-col">
+        {/* ── LEFT PANEL ── */}
+        <div className="w-full md:w-[360px] bg-white border-b md:border-b-0 md:border-r border-gray-200 p-8 flex flex-col pt-10">
+          
+          {step === 2 && (
+            <button
+              onClick={() => setStep(1)}
+              className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors mb-6"
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+          )}
 
-        {/* Brand */}
-        <div className="flex items-center gap-2 mb-10">
-          <div className="w-7 h-7 bg-[#006BFF] rounded-md flex items-center justify-center">
-            <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-            </svg>
-          </div>
-          <span className="font-bold text-gray-900">SlotSync</span>
-        </div>
+           <p className="text-sm font-bold text-gray-500 mb-1">Default User</p>
+          <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-6">{eventType.title}</h1>
 
-        {/* Host avatar */}
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#006BFF] to-[#0052CC] flex items-center justify-center text-white text-lg font-bold mb-4 shadow-sm">
-          D
-        </div>
-        <p className="text-sm text-gray-500 mb-1">Default User</p>
-
-        {/* Colour dot + Event title */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: eventType.color }} />
-          <h1 className="text-2xl font-bold text-gray-900 leading-tight">{eventType.title}</h1>
-        </div>
-
-        {/* Duration */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-          <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
-          </svg>
-          <span>{eventType.duration_minutes} minutes</span>
-        </div>
-
-        {/* Meeting type */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.868V15.13a1 1 0 0 1-1.447.899L15 14M3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/>
-          </svg>
-          <span>Web conference</span>
-        </div>
-
-        {/* Description */}
-        {eventType.description && (
-          <p className="text-sm text-gray-500 leading-relaxed mt-5 pt-5 border-t border-gray-200">
-            {eventType.description}
-          </p>
-        )}
-
-        {/* Selected slot summary pill */}
-        {selectedDate && (
-          <div className="mt-auto pt-8">
-            <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Selected</p>
-              <p className="text-sm font-semibold text-gray-900">
-                {formatDate(selectedDate + 'T12:00:00')}
-              </p>
-              {selectedTime && (
-                <p className="text-sm text-[#006BFF] font-semibold mt-0.5">
-                  {fmtTime(selectedTime)} · {eventType.duration_minutes} min
-                </p>
-              )}
+          <div className="space-y-4 text-sm font-semibold text-gray-500">
+            <div className="flex items-start gap-3">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {eventType.duration_minutes} min
+            </div>
+            
+            {step === 2 && (
+              <div className="flex items-start gap-3 text-[#006BFF]">
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div className="flex flex-col">
+                  <span>{fmtTime(selectedTime)} – {fmtTime(new Date(new Date(`2000-01-01T${selectedTime}`).getTime() + eventType.duration_minutes*60000).toTimeString().substring(0,5))}</span>
+                  <span>{formatDate(selectedDate)}</span>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex items-start gap-3">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5"><path d="M15 10l4.55 4.55a1 1 0 01-1.41 1.41L13.6 11.41a1 1 0 011.41-1.41z"/><rect x="4" y="6" width="10" height="12" rx="2"/></svg>
+              Web conferencing details provided upon confirmation.
             </div>
           </div>
-        )}
-      </aside>
 
-      {/* ══ RIGHT PANEL — Booking Flow ════════════ */}
-      <main className="flex-1 p-8 lg:p-12 xl:p-16">
+          {eventType.description && (
+            <p className="text-sm text-gray-600 mt-6 pt-6 border-t border-gray-100 leading-relaxed whitespace-pre-wrap">
+              {eventType.description}
+            </p>
+          )}
 
-        {/* Error banner */}
-        {error && (
-          <div className="mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="flex-shrink-0 mt-0.5">
-              <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-            </svg>
-            {error}
-          </div>
-        )}
+        </div>
 
-        {/* ── STEP 1: Calendar ─────────────────── */}
-        {!selectedDate && (
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Select a Date &amp; Time</h2>
-            <p className="text-sm text-gray-500 mb-8">Choose a date to see available time slots.</p>
-            <Calendar
-              availability={availability}
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-            />
-          </div>
-        )}
+        {/* ── RIGHT PANEL ── */}
+        <div className="flex-1 bg-white p-8 md:p-10 relative">
 
-        {/* ── STEP 2: Time Slots ───────────────── */}
-        {selectedDate && !selectedTime && (
-          <div>
-            {/* Back to calendar */}
-            <button
-              onClick={resetDate}
-              className="flex items-center gap-1.5 text-sm text-[#006BFF] hover:text-blue-700 font-medium mb-6 group"
-            >
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
-                className="group-hover:-translate-x-0.5 transition-transform">
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
-              {formatDate(selectedDate + 'T12:00:00')}
-            </button>
+          {error && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200 shadow-sm flex gap-2 z-10">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              <span>{error}</span>
+            </div>
+          )}
 
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Select a Time</h2>
-            <p className="text-sm text-gray-500 mb-6">All times shown in your local timezone.</p>
-
-            <TimeSlotPicker
-              slots={slots}
-              selectedTime={selectedTime}
-              onSelect={setSelectedTime}
-              loading={slotsLoading}
-            />
-          </div>
-        )}
-
-        {/* ── STEP 3: Booking Form ─────────────── */}
-        {selectedDate && selectedTime && (
-          <div className="max-w-sm">
-            {/* Back to time slots */}
-            <button
-              onClick={resetTime}
-              className="flex items-center gap-1.5 text-sm text-[#006BFF] hover:text-blue-700 font-medium mb-6 group"
-            >
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
-                className="group-hover:-translate-x-0.5 transition-transform">
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
-              {fmtTime(selectedTime)}
-            </button>
-
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Enter Details</h2>
-            <p className="text-sm text-gray-500 mb-6">Tell us a bit about yourself before we confirm your booking.</p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Full Name <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text" required
-                  value={form.name}
-                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Your full name"
-                  className="input-field"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email Address <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="email" required
-                  value={form.email}
-                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                  placeholder="your@email.com"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Additional Notes <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <textarea
-                  rows={3}
-                  value={form.notes}
-                  onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-                  placeholder="Anything you'd like to share before the meeting?"
-                  className="input-field resize-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-primary w-full py-3 text-base mt-2"
-              >
-                {submitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Confirming…
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path d="M20 6 9 17l-5-5"/>
-                    </svg>
-                    Confirm Booking
-                  </>
+          {step === 1 ? (
+            /* STEP 1: Picker */
+            <div className="h-full flex flex-col pt-2 md:pt-0">
+              <h2 className="text-xl font-bold text-gray-900 mb-8">Select a Date & Time</h2>
+              
+              <div className="flex flex-col lg:flex-row gap-8 lg:gap-14">
+                <div className="flex-1">
+                  <Calendar availability={availability} selectedDate={selectedDate} onDateSelect={handleDateSelect} />
+                </div>
+                
+                {selectedDate && (
+                  <div className="w-full lg:w-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                    <p className="text-[15px] font-semibold text-gray-900 mb-4 h-[32px] flex items-center">
+                      {formatDate(selectedDate)}
+                    </p>
+                    <TimeSlotPicker slots={slots} selectedTime={selectedTime} onSelect={handleTimeSelect} loading={slotsLoading} />
+                  </div>
                 )}
-              </button>
-            </form>
-          </div>
-        )}
-      </main>
+              </div>
+            </div>
+          ) : (
+            /* STEP 2: Form */
+            <div className="h-full max-w-[440px] animate-in fade-in slide-in-from-right-4 duration-300 pt-2 md:pt-0">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Enter Details</h2>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="label">Name *</label>
+                  <input type="text" required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="field" autoFocus />
+                </div>
+                <div>
+                  <label className="label">Email *</label>
+                  <input type="email" required value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="field" />
+                </div>
+                <div>
+                  <label className="label">Notes for host</label>
+                  <textarea rows={4} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} className="field resize-none" />
+                </div>
+                <div className="text-xs text-gray-500 pt-2 pb-4">
+                  By proceeding, you confirm that you have read and agree to SlotSync's Terms of Use.
+                </div>
+                <button type="submit" disabled={submitting} className="btn-primary rounded-full px-6 py-3.5 text-[15px]">
+                  {submitting ? 'Scheduling...' : 'Schedule Event'}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

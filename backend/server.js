@@ -29,13 +29,15 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// ── Routes ──────────────────────────────────────
+const contactRoutes      = require('./routes/contactRoutes');
+
 app.use('/health',       healthRoutes);
 app.use('/event-types',  eventTypeRoutes);
 app.use('/availability', availabilityRoutes);
 app.use('/bookings',     bookingRoutes);
 app.use('/meetings',     meetingRoutes);
 app.use('/settings',     settingsRoutes);
+app.use('/contact',      contactRoutes);
 
 // 404 handler — catches any unrecognized routes
 app.use((req, res) => {

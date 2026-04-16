@@ -1,281 +1,239 @@
 'use client';
-// app/(dashboard)/page.js — Landing Page at /
+// Hybrid Landing Page — Clean Hero/Nav, Brutalist Accents for About & Contact
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import * as api from '@/lib/api';
 
-/* ── Feature cards data ─────────────────────────── */
-const FEATURES = [
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#006BFF" strokeWidth="1.75" viewBox="0 0 24 24">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-      </svg>
-    ),
-    title: 'Event Types',
-    desc: 'Create custom event types with unique booking links. Set durations, colours, and descriptions.',
-  },
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#10B981" strokeWidth="1.75" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-      </svg>
-    ),
-    title: 'Smart Availability',
-    desc: 'Define your weekly hours once. Slots outside your schedule are automatically blocked.',
-  },
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#8B5CF6" strokeWidth="1.75" viewBox="0 0 24 24">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-    title: 'Instant Booking',
-    desc: 'Invitees pick a slot, fill in their details, and get confirmed instantly — no back-and-forth.',
-  },
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#F59E0B" strokeWidth="1.75" viewBox="0 0 24 24">
-        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-      </svg>
-    ),
-    title: 'No Double Booking',
-    desc: 'Overlap detection prevents two people from booking the same slot simultaneously.',
-  },
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#EF4444" strokeWidth="1.75" viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    ),
-    title: 'Meetings Dashboard',
-    desc: 'See all upcoming meetings at a glance. Cancel with one click if plans change.',
-  },
-  {
-    icon: (
-      <svg width="24" height="24" fill="none" stroke="#06B6D4" strokeWidth="1.75" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
-    title: 'Timezone Aware',
-    desc: 'Set your timezone in one place. All bookings respect your local working hours.',
-  },
-];
-
-/* ── Steps ──────────────────────────────────────── */
 const STEPS = [
-  { num: '01', title: 'Create an Event Type', desc: 'Name it, set the duration, pick a colour. Your booking link is ready instantly.' },
-  { num: '02', title: 'Set Your Availability', desc: 'Choose which days and hours you\'re open. Weekdays 9–5 or custom — up to you.' },
-  { num: '03', title: 'Share Your Link', desc: 'Send /book/your-event to anyone. They pick a time, you get the meeting.' },
-];
-
-/* ── Stats ──────────────────────────────────────── */
-const STATS = [
-  { value: '3 min', label: 'Setup time' },
-  { value: '0', label: 'Double bookings' },
-  { value: '100%', label: 'Free to use' },
+  { num: '01', title: 'Define Rules', body: 'Set your hours, break times, and meeting locations.' },
+  { num: '02', title: 'Share Link', body: 'Send your personal SlotSync URL to anyone.' },
+  { num: '03', title: 'Get Booked', body: 'Invitees pick a slot. The event hits your calendar instantly.' },
 ];
 
 export default function LandingPage() {
-  const [scrolled, setScrolled] = useState(false);
+  const [contactForm, setContactForm] = useState({ type: 'feedback', email: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState(null);
 
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setStatus(null);
+    try {
+      await api.submitContact(contactForm);
+      setStatus({ type: 'success', text: 'Message sent successfully!' });
+      setContactForm({ ...contactForm, message: '' });
+    } catch (error) {
+      setStatus({ type: 'error', text: error.message || 'Failed to send message' });
+    } finally {
+      setSubmitting(false);
+      setTimeout(() => setStatus(null), 5000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
+      
+      {/* ── CLEAN NAVBAR ── */}
+      <nav className="fixed top-0 inset-x-0 h-[72px] bg-white border-b border-gray-200 z-50 flex items-center px-6 md:px-10 justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+            S
+          </div>
+          <span className="font-bold text-xl tracking-tight text-gray-900">SlotSync</span>
+        </div>
 
-      {/* ── NAV ─────────────────────────────────── */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm' : 'bg-transparent'}`}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[#006BFF] rounded-[10px] flex items-center justify-center shadow-sm">
-              <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-              </svg>
+        <div className="hidden md:flex gap-8 font-medium text-sm text-gray-600">
+          <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
+          <a href="#steps" className="hover:text-blue-600 transition-colors">How It Works</a>
+          <a href="#contact" className="hover:text-blue-600 transition-colors">Contact</a>
+        </div>
+
+        <Link href="/dashboard" className="btn-primary">
+          Go to Dashboard
+        </Link>
+      </nav>
+
+      {/* ── CLEAN HERO ── */}
+      <header className="pt-32 pb-24 px-6 md:px-10 bg-gradient-to-b from-blue-50/50 to-white relative overflow-hidden">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
+          
+          <div className="space-y-6">
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-[1.1]">
+              Easy scheduling <br/>
+              <span className="text-blue-600">ahead</span>
+            </h1>
+            
+            <p className="text-xl text-gray-600 max-w-lg leading-relaxed">
+              SlotSync is your scheduling automation platform for eliminating the back-and-forth emails to find the perfect time.
+            </p>
+            
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link href="/dashboard" className="btn-primary text-base px-8 py-3.5 rounded-full">
+                Start for free
+              </Link>
+              <Link href="/book/30-min-meeting" className="btn-secondary text-base px-8 py-3.5 rounded-full border-gray-300">
+                View Live Demo
+              </Link>
             </div>
-            <span className="font-bold text-gray-900 text-[17px] tracking-tight">SlotSync</span>
+            <p className="text-xs text-gray-500 font-medium">No credit card required. No auth needed.</p>
           </div>
 
-          {/* Nav links */}
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
-            <a href="#how-it-works" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">How it works</a>
-          </nav>
-
-          {/* CTA */}
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="hidden sm:inline-flex text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
-              Sign in
-            </Link>
-            <Link href="/dashboard" className="btn-primary text-sm px-4 py-2">
-              Get Started Free
-            </Link>
+          <div className="relative h-[400px] w-full flex items-center justify-center lg:justify-end">
+            {/* Professional Soft Calendar Graphic */}
+            <div className="relative w-full max-w-[400px] h-[350px] bg-white rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 flex flex-col overflow-hidden">
+              <div className="h-12 border-b border-gray-100 flex items-center px-4 gap-2 bg-gray-50/50">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-amber-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+              </div>
+              <div className="p-6 flex flex-col gap-4">
+                <div className="h-6 w-1/3 bg-gray-200 rounded-md skeleton" />
+                <div className="flex gap-4">
+                  <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">S</div>
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-full bg-gray-100 rounded" />
+                    <div className="h-4 w-5/6 bg-gray-100 rounded" />
+                    <div className="h-4 w-4/6 bg-gray-100 rounded" />
+                  </div>
+                </div>
+                <div className="flex justify-between mt-4">
+                  <div className="px-4 py-2 bg-blue-50 text-blue-600 text-sm font-semibold rounded-lg">9:00 AM</div>
+                  <div className="px-4 py-2 bg-gray-50 text-gray-400 text-sm font-semibold rounded-lg">9:30 AM</div>
+                  <div className="px-4 py-2 bg-gray-50 text-gray-400 text-sm font-semibold rounded-lg">10:00 AM</div>
+                </div>
+                <div className="mt-auto pt-4 flex gap-2">
+                  <div className="flex-1 py-3 bg-blue-600 rounded-xl" />
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </header>
 
-      {/* ── HERO ────────────────────────────────── */}
-      <section className="pt-32 pb-24 px-6 text-center relative overflow-hidden">
-        {/* Background gradient blob */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-blue-50/80 to-transparent rounded-full blur-3xl" />
+      {/* ── ABOUT ── */}
+      <section id="about" className="py-24 px-6 md:px-10 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight">Why Not Just Email?</h2>
+            <p className="mt-6 text-xl text-gray-600 leading-relaxed">
+              Because finding a time to meet shouldn't take more time than the meeting itself.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: '📅', title: 'Event Types', p: 'Create custom durations and unique links for single meetings.' },
+              { icon: '⏱️', title: 'Availability', p: 'Hardcode your weekly rules so nobody can book you at 3 AM.' },
+              { icon: '🚀', title: 'Zero Clutter', p: 'Raw, unadulterated performance. Professional UI.' }
+            ].map((card, i) => (
+              <div key={i} className="card p-8 flex flex-col hover:shadow-lg transition-shadow border-gray-100">
+                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                  {card.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
+                <p className="text-gray-600 leading-relaxed flex-1">
+                  {card.p}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── STEPS (CLEAN PROFESSIONAL) ── */}
+      <section id="steps" className="py-24 px-6 md:px-10 bg-gray-50">
+        <div className="max-w-5xl mx-auto text-center mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">How it works</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">Set up your availability and let the calendar do the heavy lifting.</p>
         </div>
 
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 mb-8">
-          <div className="w-2 h-2 bg-[#006BFF] rounded-full animate-pulse" />
-          <span className="text-sm font-medium text-[#006BFF]">Calendly-style scheduling — free forever</span>
-        </div>
-
-        {/* Headline */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.08] tracking-tight mb-6 max-w-4xl mx-auto">
-          Schedule meetings
-          <span className="text-[#006BFF]"> effortlessly</span>
-        </h1>
-
-        {/* Sub-headline */}
-        <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-          Create event types, set your availability, and share your booking link. Your invitees pick a slot — you just show up.
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-          <Link
-            href="/dashboard"
-            className="btn-primary px-8 py-3.5 text-base rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
-          >
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Start Scheduling Free
-          </Link>
-          <Link
-            href="/book/30-min-meeting"
-            className="btn-secondary px-8 py-3.5 text-base rounded-xl"
-          >
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-            </svg>
-            See Live Demo
-          </Link>
-        </div>
-
-        {/* Stats bar */}
-        <div className="inline-flex items-center divide-x divide-gray-200 bg-white border border-gray-200 rounded-2xl shadow-sm px-2">
-          {STATS.map((s, i) => (
-            <div key={i} className="px-8 py-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5 font-medium">{s.label}</p>
+        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-10">
+          {STEPS.map((s, i) => (
+            <div key={i} className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl mb-6">
+                {s.num}
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{s.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{s.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── FEATURES ────────────────────────────── */}
-      <section id="features" className="py-24 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Everything you need to get booked</h2>
-            <p className="text-lg text-gray-500 max-w-xl mx-auto">Built for professionals who want to eliminate the scheduling back-and-forth.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200"
-              >
-                <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mb-5">
-                  {f.icon}
-                </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+      {/* ── CONTACT & FEEDBACK ── */}
+      <section id="contact" className="py-24 bg-white border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 flex flex-col md:flex-row gap-16">
+          
+          {/* Contact Info Box */}
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Reach Out</h2>
+            <p className="text-gray-600 text-lg mb-10 max-w-md">
+              Have questions, feedback, or need support? Reach out via the form or email us directly. 
+              Messages are routed instantly.
+            </p>
+            
+            <div className="flex items-start gap-4 mb-8">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Up and running in minutes</h2>
-            <p className="text-lg text-gray-500">Three simple steps to start accepting bookings.</p>
-          </div>
-
-          <div className="space-y-8">
-            {STEPS.map((s, i) => (
-              <div key={i} className="flex gap-8 items-start">
-                {/* Number */}
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold text-[#006BFF]">{s.num}</span>
-                </div>
-                {/* Content */}
-                <div className="flex-1 pt-2">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">{s.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{s.desc}</p>
-                  {/* Connector line (except last) */}
-                  {i < STEPS.length - 1 && (
-                    <div className="mt-6 ml-[-42px] w-px h-8 bg-gradient-to-b from-blue-200 to-transparent hidden sm:block" />
-                  )}
-                </div>
+              <div>
+                <h3 className="font-bold text-gray-900 mb-1">Direct Email</h3>
+                <a href="mailto:deepanshusingla0746@gmail.com" className="text-[#006BFF] hover:underline font-medium">
+                  deepanshusingla0746@gmail.com
+                </a>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA BANNER ──────────────────────────── */}
-      <section className="py-24 px-6 bg-gradient-to-br from-[#006BFF] to-[#0052CC]">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to simplify your scheduling?
-          </h2>
-          <p className="text-blue-100 mb-10 text-lg">
-            Set up your scheduling page in under 3 minutes. No credit card required.
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 bg-white text-[#006BFF] font-bold px-8 py-3.5 rounded-xl hover:bg-blue-50 transition-colors shadow-xl"
-          >
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Open Dashboard
-          </Link>
-        </div>
-      </section>
-
-      {/* ── FOOTER ──────────────────────────────── */}
-      <footer className="bg-white border-t border-gray-100 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-[#006BFF] rounded-[8px] flex items-center justify-center">
-              <svg width="13" height="13" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-              </svg>
             </div>
-            <span className="font-bold text-gray-900">SlotSync</span>
           </div>
 
-          <p className="text-sm text-gray-400">
-            © 2026 SlotSync · Built as a placement assignment · Calendly Clone
-          </p>
+          {/* Feedback/Contact Form */}
+          <div className="w-full max-w-md">
+            <form className="card p-8 shadow-xl shadow-gray-200/50" onSubmit={handleContactSubmit}>
+              
+              {status && (
+                <div className={`p-4 rounded-lg text-sm font-medium mb-6 ${status.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>
+                  {status.text}
+                </div>
+              )}
 
-          <div className="flex items-center gap-5">
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">Dashboard</Link>
-            <Link href="/book/30-min-meeting" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">Book a Demo</Link>
+              <div className="flex gap-6 mb-6">
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                  <input type="radio" name="type" value="feedback" checked={contactForm.type === 'feedback'} onChange={() => setContactForm(p => ({...p, type: 'feedback'}))} className="text-[#006BFF] focus:ring-[#006BFF]" />
+                  Feedback
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                  <input type="radio" name="type" value="contact" checked={contactForm.type === 'contact'} onChange={() => setContactForm(p => ({...p, type: 'contact'}))} className="text-[#006BFF] focus:ring-[#006BFF]" />
+                  Contact
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="label">Your Email</label>
+                  <input type="email" required className="field" placeholder="you@email.com" value={contactForm.email} onChange={e => setContactForm(p => ({...p, email: e.target.value}))} />
+                </div>
+                <div>
+                  <label className="label">Message</label>
+                  <textarea required className="field resize-none h-32" placeholder="Tell us what you're thinking..." value={contactForm.message} onChange={e => setContactForm(p => ({...p, message: e.target.value}))} />
+                </div>
+                <button type="submit" disabled={submitting} className="btn-primary w-full py-3 mt-2">
+                  {submitting ? 'Sending...' : 'Send Message'}
+                </button>
+              </div>
+            </form>
           </div>
+
         </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="bg-white border-t border-gray-200 py-12 text-center text-gray-500 text-sm flex flex-col items-center">
+        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm mb-4">S</div>
+        <p>© 2026 SlotSync Platform. Built with Next.js, Tailwind, and Node.js.</p>
       </footer>
+
     </div>
   );
 }

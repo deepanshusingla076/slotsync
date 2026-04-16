@@ -47,3 +47,6 @@ export const cancelMeeting        = (id)       => request('DELETE', `/meetings/$
 // ── Settings ─────────────────────────────────────
 export const getSettings          = ()         => request('GET', '/settings');
 export const updateSettings       = (data)     => request('PUT', '/settings', data);
+
+// ── Contact ──────────────────────────────────────
+export const submitContact        = (data)     => request('POST', '/contact', data);
