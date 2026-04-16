@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Reusable button and input styles */
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium
+           hover:bg-blue-700 active:bg-blue-800 transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium
+           hover:bg-gray-50 transition-colors;
+  }
+
+  .btn-danger {
+    @apply border border-red-200 text-red-500 px-3 py-1.5 rounded-lg text-sm font-medium
+           hover:bg-red-50 transition-colors;
+  }
+
+  .input-field {
+    @apply w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900
+           placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500
+           focus:border-transparent transition;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-white rounded-xl border border-gray-100 shadow-sm;
+  }
+
+  /* Toggle switch */
+  .toggle-track {
+    @apply relative w-10 h-5 rounded-full transition-colors cursor-pointer;
+  }
+
+  .toggle-thumb {
+    @apply absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform;
+  }
+}
