@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS event_types (
 
 CREATE INDEX IF NOT EXISTS idx_slug ON event_types (slug);
 CREATE INDEX IF NOT EXISTS idx_is_active ON event_types (is_active);
+CREATE INDEX IF NOT EXISTS idx_event_types_created_at_desc ON event_types (created_at DESC, id DESC);
 
 -- ============================================================
 -- TABLE 2: availability

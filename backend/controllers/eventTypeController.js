@@ -19,6 +19,7 @@ const generateSlug = (title) =>
 const getAllEventTypes = async (req, res) => {
   try {
     const eventTypes = await eventTypeModel.getAll();
+    res.set('Cache-Control', 'private, max-age=15');
     res.status(200).json(eventTypes);
   } catch (error) {
     console.error('getAllEventTypes error:', error.message);

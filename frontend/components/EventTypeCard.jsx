@@ -4,9 +4,9 @@
  * Displays a summary of an event type with a clean, professional card design.
  */
 
-import { useState, Fragment } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, Transition } from '@headlessui/react';
+
 
 export default function EventTypeCard({ event, origin, onEdit, onDelete }) {
   const [copied, setCopied] = useState(false);
@@ -20,7 +20,7 @@ export default function EventTypeCard({ event, origin, onEdit, onDelete }) {
   };
 
   return (
-    <div className="card flex flex-col h-full relative overflow-hidden group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <div className="flex flex-col h-full relative overflow-hidden group bg-white border border-slate-200 rounded-2xl transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
 
       {/* Accent color stripe */}
       <div
@@ -28,80 +28,68 @@ export default function EventTypeCard({ event, origin, onEdit, onDelete }) {
         style={{ backgroundColor: event.color || '#0066FF' }}
       />
 
-      <div className="p-5 pl-6 flex-1 flex flex-col relative w-full">
-        <div className="flex justify-between items-start mb-3">
-           <h3 className="text-[16px] font-bold text-gray-900 leading-snug">
+      <div className="p-4 pl-5 flex-1 flex flex-col relative w-full">
+        <div className="mb-3">
+           <h3 className="text-[15px] font-bold text-slate-900 leading-snug pr-2">
              {event.title}
            </h3>
-           <Menu as="div" className="relative inline-block text-left">
-             <Menu.Button className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer outline-none p-1 rounded-md hover:bg-gray-100">
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
-             </Menu.Button>
-             <Transition
-               as={Fragment}
-               enter="transition ease-out duration-100"
-               enterFrom="transform opacity-0 scale-95"
-               enterTo="transform opacity-100 scale-100"
-               leave="transition ease-in duration-75"
-               leaveFrom="transform opacity-100 scale-100"
-               leaveTo="transform opacity-0 scale-95"
-             >
-               <Menu.Items className="absolute right-0 mt-1 w-36 origin-top-right divide-y divide-gray-100 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                 <div className="px-1 py-1">
-                   <Menu.Item>
-                     {({ active }) => (
-                       <button onClick={onEdit} className={`${active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'} group flex w-full items-center rounded-lg px-2 py-2 text-sm font-medium`}>
-                          Edit
-                       </button>
-                     )}
-                   </Menu.Item>
-                   {event.is_active && (
-                     <Menu.Item>
-                       {({ active }) => (
-                         <Link href={`/book/${event.slug}`} target="_blank" className={`${active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'} group flex w-full items-center rounded-lg px-2 py-2 text-sm font-medium`}>
-                            Preview
-                         </Link>
-                       )}
-                     </Menu.Item>
-                   )}
-                 </div>
-                 <div className="px-1 py-1">
-                   <Menu.Item>
-                     {({ active }) => (
-                       <button onClick={onDelete} className={`${active ? 'bg-red-50 text-red-600' : 'text-red-500'} group flex w-full items-center rounded-lg px-2 py-2 text-sm font-medium`}>
-                          Delete
-                       </button>
-                     )}
-                   </Menu.Item>
-                 </div>
-               </Menu.Items>
-             </Transition>
-           </Menu>
         </div>
 
-        <div className="flex items-center gap-2 mb-4">
-           <div className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-md">
+        <div className="flex items-center gap-2 mb-3">
+           <div className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-md">
              {event.duration_minutes} min
-           </div>
-           {/* Placeholder for buffer if we had it */}
-           <div className="px-2 py-0.5 bg-blue-50 text-blue-500 text-xs font-semibold rounded-md hidden">
-             +15m buffer
            </div>
         </div>
 
         <button
             onClick={copyLink}
-            className="flex items-center gap-1.5 text-xs font-medium text-[#0066FF] hover:underline mb-3 w-fit"
+          className="flex items-center gap-1.5 text-[11px] font-medium text-[#0066FF] hover:underline mb-2.5 w-fit"
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          {event.slug ? `default_user/${event.slug}` : `default_user/meeting`}
+          {copied ? 'Copied link' : (event.slug ? `default_user/${event.slug}` : `default_user/meeting`)}
         </button>
 
         {event.description && (
-          <p className="text-sm text-gray-600 line-clamp-2 flex-1 leading-relaxed">
+          <p className="text-xs text-slate-600 line-clamp-2 flex-1 leading-relaxed">
             {event.description}
           </p>
         )}
+
+        {!event.description && <div className="flex-1" />}
+
+        <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <button
+            onClick={onEdit}
+            className="inline-flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors duration-150"
+          >
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            Edit
+          </button>
+
+          {event.is_active ? (
+            <Link
+              href={`/book/${event.slug}`}
+              target="_blank"
+              className="inline-flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-semibold text-[#0066FF] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors duration-150"
+            >
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v7H3V3h7"/></svg>
+              Preview
+            </Link>
+          ) : (
+            <div className="inline-flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 rounded-lg cursor-not-allowed">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v7H3V3h7"/></svg>
+              Preview
+            </div>
+          )}
+
+          <button
+            onClick={onDelete}
+            className="inline-flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors duration-150 col-span-2 sm:col-span-1"
+          >
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Delete
+          </button>
+        </div>
 
       </div>
     </div>

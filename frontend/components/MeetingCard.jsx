@@ -11,7 +11,7 @@ export default function MeetingCard({ meeting, showCancel, onCancel }) {
   const isPast    = new Date(meeting.end_time) < new Date() && !cancelled;
 
   return (
-    <div className={`card flex flex-col md:flex-row overflow-hidden ${cancelled ? 'opacity-50 grayscale bg-gray-50' : 'hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300'}`}>
+    <div className={`card flex flex-col md:flex-row overflow-hidden rounded-2xl border border-slate-200 ${cancelled ? 'opacity-60 grayscale bg-slate-50' : 'hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300'}`}>
 
       {/* Accent stripe */}
       <div
@@ -24,7 +24,7 @@ export default function MeetingCard({ meeting, showCancel, onCancel }) {
         {/* Left: Invitee Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               {meeting.event_title}
             </span>
             {cancelled ? (
@@ -36,11 +36,11 @@ export default function MeetingCard({ meeting, showCancel, onCancel }) {
             )}
           </div>
 
-          <h3 className="text-base font-bold text-gray-900 truncate mb-1.5">
+          <h3 className="text-base font-bold text-slate-900 truncate mb-1.5">
             {meeting.invitee_name}
           </h3>
 
-          <div className="flex items-center gap-1.5 text-sm text-gray-400 truncate">
+          <div className="flex items-center gap-1.5 text-sm text-slate-500 truncate">
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
             </svg>
@@ -49,12 +49,12 @@ export default function MeetingCard({ meeting, showCancel, onCancel }) {
         </div>
 
         {/* Right: Date/Time + Action */}
-        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 flex-shrink-0 pt-4 sm:pt-0 border-t sm:border-0 border-gray-50">
+        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 flex-shrink-0 pt-4 sm:pt-0 border-t sm:border-0 border-slate-100">
           <div className="text-left sm:text-right">
-            <p className="text-[15px] font-bold text-gray-900">
+            <p className="text-[15px] font-bold text-slate-900">
               {formatDate(meeting.start_time)}
             </p>
-            <p className="text-sm text-gray-400 mt-0.5 flex items-center gap-1.5 justify-start sm:justify-end">
+            <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1.5 justify-start sm:justify-end">
               <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               {formatTime(meeting.start_time)} • {meeting.duration_minutes} min
             </p>

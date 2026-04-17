@@ -135,15 +135,15 @@ export default function BookingPage() {
     <div className="min-h-screen bg-gray-50/50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
 
       {/* Container */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/30 border border-gray-100 flex flex-col md:flex-row w-full max-w-[1060px] min-h-[600px] overflow-hidden">
+      <div className="bg-white rounded-md shadow-xl shadow-gray-200/30 border border-gray-100 flex flex-col md:flex-row w-full max-w-[1020px] min-h-[560px] max-h-[88dvh] overflow-hidden">
 
         {/* ── LEFT PANEL ── */}
-        <div className="w-full md:w-[360px] bg-white border-b md:border-b-0 md:border-r border-gray-100 p-8 flex flex-col pt-10">
+        <div className="w-full md:w-[340px] bg-white border-b md:border-b-0 md:border-r border-gray-100 p-6 flex flex-col pt-8 overflow-y-auto">
 
           {step === 2 && (
             <button
               onClick={() => setStep(1)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all mb-6"
+              className="w-10 h-10 rounded-md flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all mb-6"
             >
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
             </button>
@@ -192,7 +192,7 @@ export default function BookingPage() {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div className="flex-1 bg-white p-8 md:p-10 relative">
+        <div className="flex-1 bg-white p-6 md:p-8 relative overflow-y-auto">
 
           {error && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100 shadow-sm flex gap-2 z-10 animate-fade-in">
@@ -203,15 +203,15 @@ export default function BookingPage() {
 
           {step === 1 ? (
             /* STEP 1: Picker */
-            <div className="h-full flex flex-col pt-2 md:pt-0 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-900 mb-8">Select a Date & Time</h2>
+            <div className="h-full flex flex-col pt-2 md:pt-0 animate-fade-in min-h-0">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Select a Date & Time</h2>
 
-              <div className="flex flex-col lg:flex-row gap-8 lg:gap-14">
+              <div className="flex flex-col lg:flex-row gap-7 lg:gap-12 min-h-0">
                 <div className="flex-1">
                   <Calendar availability={availability} selectedDate={selectedDate} onDateSelect={handleDateSelect} />
                 </div>
 
-                <div className="w-full lg:w-[240px] animate-slide-in-right">
+                <div className="w-full lg:w-[230px] animate-slide-in-right min-h-0">
                   <p className="text-[15px] font-bold text-gray-900 mb-4 h-[32px] flex items-center">
                     {selectedDate ? formatDate(selectedDate) : 'Select a date'}
                   </p>
@@ -233,8 +233,8 @@ export default function BookingPage() {
                       )}
                     </>
                   ) : (
-                    <div className="flex flex-col items-center py-12 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl">
-                      <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mb-3">
+                    <div className="flex flex-col items-center py-12 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-md">
+                      <div className="w-12 h-12 bg-white rounded-md shadow-sm border border-gray-100 flex items-center justify-center mb-3">
                         <svg width="22" height="22" fill="none" stroke="#D1D5DB" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                       </div>
                       <p className="text-sm font-bold text-gray-900 mb-1">Choose your date</p>

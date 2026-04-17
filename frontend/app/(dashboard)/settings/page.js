@@ -7,6 +7,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '@/lib/api';
 
+const PROFILE_STORAGE_KEY = 'slotsync_profile_v1';
+const PREFS_STORAGE_KEY = 'slotsync_prefs_v1';
+
+const DEFAULT_PROFILE = {
+  name: 'Default User',
+  email: 'user@slotsync.com',
+  role: 'Admin',
+};
+
+const DEFAULT_PREFS = {
+  emailNotifications: true,
+  autoConfirm: false,
+  bufferTime: 0,
+  minNotice: 60,
+};
+
 const TIMEZONES = [
   'Asia/Kolkata','Asia/Dubai','Asia/Singapore','Asia/Tokyo',
   'Europe/London','Europe/Paris','Europe/Berlin',
@@ -21,27 +37,35 @@ export default function SettingsPage() {
   const [saving, setSaving]       = useState(false);
   const [success, setSuccess]     = useState(false);
   const [error, setError]         = useState('');
+  const [dangerLoading, setDangerLoading] = useState(false);
+  const [dangerNotice, setDangerNotice] = useState('');
 
   // Profile
-  const [profile, setProfile] = useState({
-    name: 'Default User',
-    email: 'user@slotsync.com',
-    role: 'Admin',
-  });
+  const [profile, setProfile] = useState(DEFAULT_PROFILE);
 
   // Preferences
-  const [prefs, setPrefs] = useState({
-    emailNotifications: true,
-    autoConfirm: false,
-    bufferTime: 0,
-    minNotice: 60,
-  });
+  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
 
   const load = useCallback(async () => {
     try {
       setLoading(true); setError('');
       const settings = await api.getSettings();
       if (settings?.timezone) setTimezone(settings.timezone);
+
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+      const rawPrefs = localStorage.getItem(PREFS_STORAGE_KEY);
+      if (rawProfile) {
+        const parsed = JSON.parse(rawProfile);
+        if (parsed?.name && parsed?.email) {
+          setProfile({ ...DEFAULT_PROFILE, ...parsed });
+        }
+      }
+      if (rawPrefs) {
+        const parsed = JSON.parse(rawPrefs);
+        if (parsed && typeof parsed === 'object') {
+          setPrefs({ ...DEFAULT_PREFS, ...parsed });
+        }
+      }
     } catch (err) { setError(err.message); } finally { setLoading(false); }
   }, []);
 
@@ -50,9 +74,49 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true); setSuccess(false); setError('');
     try {
+      if (!profile.name.trim()) {
+        throw new Error('Display Name is required');
+      }
+      if (!/^\S+@\S+\.\S+$/.test(profile.email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
       await api.updateSettings({ timezone });
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+      localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(prefs));
       setSuccess(true); setTimeout(() => setSuccess(false), 3000);
     } catch (err) { setError(err.message); } finally { setSaving(false); }
+  };
+
+  const handleDeleteAllData = async () => {
+    const confirmed = confirm('Delete all event types and related bookings? This action cannot be undone.');
+    if (!confirmed) return;
+
+    setDangerLoading(true);
+    setDangerNotice('');
+    setError('');
+
+    try {
+      const events = await api.getEventTypes();
+      if (!events.length) {
+        setDangerNotice('No event types found.');
+        return;
+      }
+
+      const results = await Promise.allSettled(events.map((event) => api.deleteEventType(event.id)));
+      const failed = results.filter((result) => result.status === 'rejected').length;
+
+      if (failed > 0) {
+        setDangerNotice(`${events.length - failed} deleted, ${failed} failed.`);
+      } else {
+        setDangerNotice('All event types deleted successfully.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDangerLoading(false);
+      setTimeout(() => setDangerNotice(''), 3500);
+    }
   };
 
   if (loading) return (
@@ -65,11 +129,11 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="min-h-full flex flex-col bg-gray-50/30">
+    <div className="min-h-full flex flex-col bg-slate-50/40">
 
       {/* Header */}
-      <div className="page-header">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+      <div className="page-header !border-b border-slate-100">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Account</p>
             <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
@@ -81,7 +145,7 @@ export default function SettingsPage() {
                 Saved
               </span>
             )}
-            <button onClick={handleSave} disabled={saving} className="btn-primary rounded-full px-6">
+            <button onClick={handleSave} disabled={saving} className="btn-primary rounded-xl px-5 py-2.5">
               {saving ? 'Saving...' : 'Save changes'}
             </button>
           </div>
@@ -89,18 +153,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Body */}
-      <div className="flex-1 px-4 sm:px-8 py-8">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto space-y-4">
 
           {error && (
-            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 animate-fade-in">
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 animate-fade-in">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               <span>{error}</span>
             </div>
           )}
 
           {/* ── Profile Section ── */}
-          <div className="card p-6 animate-fade-in-up">
+          <div className="card p-6 animate-fade-in-up rounded-2xl border-slate-200 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -150,7 +214,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Timezone Section ── */}
-          <div className="card p-6 animate-fade-in-up stagger-1">
+          <div className="card p-6 animate-fade-in-up stagger-1 rounded-2xl border-slate-200 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -171,7 +235,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Scheduling Preferences ── */}
-          <div className="card p-6 animate-fade-in-up stagger-2">
+          <div className="card p-6 animate-fade-in-up stagger-2 rounded-2xl border-slate-200 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -187,7 +251,7 @@ export default function SettingsPage() {
 
             <div className="space-y-5">
               {/* Buffer Time */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gray-50/70 rounded-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/70 rounded-xl">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Buffer time between events</p>
                   <p className="text-xs text-gray-400 mt-0.5">Add padding between consecutive meetings</p>
@@ -206,7 +270,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Min Notice */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gray-50/70 rounded-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/70 rounded-xl">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Minimum scheduling notice</p>
                   <p className="text-xs text-gray-400 mt-0.5">Prevent last-minute bookings</p>
@@ -226,7 +290,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Email Notifications */}
-              <div className="flex items-center justify-between p-4 bg-gray-50/70 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-slate-50/70 rounded-xl">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Email notifications</p>
                   <p className="text-xs text-gray-400 mt-0.5">Receive emails when events are booked or cancelled</p>
@@ -241,7 +305,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Auto Confirm */}
-              <div className="flex items-center justify-between p-4 bg-gray-50/70 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-slate-50/70 rounded-xl">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Auto-confirm bookings</p>
                   <p className="text-xs text-gray-400 mt-0.5">Automatically accept all incoming booking requests</p>
@@ -258,7 +322,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Danger Zone ── */}
-          <div className="card p-6 border-red-100 animate-fade-in-up stagger-3">
+          <div className="card p-6 border-red-100 animate-fade-in-up stagger-3 rounded-2xl shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -276,9 +340,10 @@ export default function SettingsPage() {
               <div>
                 <p className="text-sm font-semibold text-gray-900">Delete all event types</p>
                 <p className="text-xs text-gray-500 mt-0.5">This will permanently remove all your event types and scheduled bookings.</p>
+                {dangerNotice && <p className="text-xs font-semibold text-red-600 mt-2">{dangerNotice}</p>}
               </div>
-              <button className="btn-danger flex-shrink-0 text-xs">
-                Delete All Data
+              <button onClick={handleDeleteAllData} disabled={dangerLoading} className="btn-danger flex-shrink-0 text-xs rounded-xl">
+                {dangerLoading ? 'Deleting...' : 'Delete All Data'}
               </button>
             </div>
           </div>

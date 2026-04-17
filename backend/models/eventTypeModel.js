@@ -1,7 +1,27 @@
 ﻿const db = require('../config/db');
 
+const CACHE_TTL_MS = 15000;
+let eventTypesCache = null;
+let cacheExpiresAt = 0;
+
+const clearCache = () => {
+  eventTypesCache = null;
+  cacheExpiresAt = 0;
+};
+
 const getAll = async () => {
-  const { rows } = await db.query('SELECT * FROM event_types ORDER BY created_at DESC');
+  if (eventTypesCache && Date.now() < cacheExpiresAt) {
+    return eventTypesCache;
+  }
+
+  const { rows } = await db.query(
+    `SELECT id, title, slug, description, duration_minutes, color, is_active, created_at, updated_at
+     FROM event_types
+     ORDER BY created_at DESC, id DESC`
+  );
+
+  eventTypesCache = rows;
+  cacheExpiresAt = Date.now() + CACHE_TTL_MS;
   return rows;
 };
 
@@ -21,6 +41,7 @@ const create = async ({ title, slug, description, duration_minutes, color }) => 
      VALUES ($1, $2, $3, $4, $5) RETURNING id`,
     [title, slug, description || null, duration_minutes, color || '#0066FF']
   );
+  clearCache();
   return rows[0].id;
 };
 
@@ -31,12 +52,14 @@ const update = async (id, { title, slug, description, duration_minutes, color, i
      WHERE id = $7`,
     [title, slug, description || null, duration_minutes, color, is_active, id]
   );
+  if (rowCount > 0) clearCache();
   return rowCount;
 };
 
 const remove = async (id) => {
   const { rowCount } = await db.query('DELETE FROM event_types WHERE id = $1', [id]);
+  if (rowCount > 0) clearCache();
   return rowCount;
 };
 
-module.exports = { getAll, getById, getBySlug, create, update, remove };
+module.exports = { getAll, getById, getBySlug, create, update, remove, clearCache };

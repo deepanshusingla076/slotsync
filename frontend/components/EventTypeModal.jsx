@@ -54,17 +54,17 @@ export default function EventTypeModal({ event, onClose, onSave }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-fade-in"
          onClick={e => e.target === e.currentTarget && onClose()}>
 
-      <div className="bg-white w-full max-w-[520px] rounded-2xl border border-gray-100 shadow-2xl flex flex-col max-h-[90vh] animate-fade-in-up">
+      <div className="bg-white w-full max-w-[560px] rounded-2xl border border-slate-200 shadow-2xl shadow-slate-300/30 flex flex-col max-h-[90vh] animate-fade-in-up">
 
         {/* Header */}
-        <div className="px-7 py-6 flex items-center justify-between border-b border-gray-100">
+        <div className="px-7 py-6 flex items-start justify-between border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">
               {isEdit ? 'Edit Event Type' : 'New Event Type'}
             </h2>
-            <p className="text-sm text-gray-400 mt-1">Configure your event details and settings</p>
+            <p className="text-sm text-gray-500 mt-1.5">Configure your event details and booking settings</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-200/70 transition-all">
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -89,12 +89,13 @@ export default function EventTypeModal({ event, onClose, onSave }) {
                 className="field"
                 placeholder="e.g. Discovery Call, Coffee Chat"
               />
+              <p className="text-xs text-gray-400 mt-1.5">This appears on your public booking page.</p>
             </div>
 
             <div>
               <label className="label">Description</label>
               <textarea
-                rows={3}
+                rows={4}
                 value={form.description} onChange={e => set('description', e.target.value)}
                 className="field resize-none"
                 placeholder="Add details like meeting links or agendas..."
@@ -113,14 +114,14 @@ export default function EventTypeModal({ event, onClose, onSave }) {
 
               <div className="flex-1">
                 <label className="label">Event Color</label>
-                <div className="flex flex-wrap gap-2.5 pt-1.5">
+                <div className="flex flex-wrap gap-2.5 pt-1.5 bg-slate-50 border border-slate-200 rounded-xl p-2.5">
                   {COLORS.map(c => (
                     <button
                       key={c} type="button" onClick={() => set('color', c)}
-                      className={`w-7 h-7 rounded-full cursor-pointer transition-all duration-200 ${
+                      className={`w-8 h-8 rounded-full cursor-pointer transition-all duration-200 border border-white ${
                         form.color === c
-                          ? 'ring-2 ring-offset-2 ring-blue-500 scale-110'
-                          : 'opacity-70 hover:opacity-100 hover:scale-105'
+                          ? 'ring-2 ring-offset-2 ring-blue-500 scale-105 shadow-sm'
+                          : 'opacity-80 hover:opacity-100 hover:scale-105'
                       }`}
                       style={{ backgroundColor: c }}
                       title={c}
@@ -131,7 +132,7 @@ export default function EventTypeModal({ event, onClose, onSave }) {
             </div>
 
             {isEdit && (
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <label className="text-sm font-semibold text-gray-700 cursor-pointer select-none" onClick={() => set('is_active', !form.is_active)}>
                   Event is active and bookable
                 </label>

@@ -55,13 +55,13 @@ export default function Calendar({ availability = [], selectedDate, onDateSelect
         <div className="flex gap-1.5">
           <button
             onClick={prevMonth}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
           >
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <button
             onClick={nextMonth}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-[#0066FF] transition-all duration-200"
           >
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </button>
