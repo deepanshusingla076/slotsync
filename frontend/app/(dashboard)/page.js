@@ -109,7 +109,7 @@ export default function LandingPage() {
   return (
     <main className={`${jakarta.className} min-h-screen bg-white text-slate-900`}>
       <nav className="sticky top-0 z-40 border-b border-blue-100 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-5 md:h-16 md:flex-row md:items-center md:justify-between md:gap-0 md:py-0">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white">
               S
@@ -124,11 +124,11 @@ export default function LandingPage() {
             <a href="#faq" className="transition-colors hover:text-blue-600">FAQ</a>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
+          <div className="flex w-full items-center justify-end gap-2 md:w-auto">
+            <Link href="/dashboard" className="rounded-full bg-blue-600 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-blue-700 sm:px-4 sm:text-xs">
               Go to Dashboard
             </Link>
-            <Link href="#contact" className="rounded-full border border-blue-200 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50">
+            <Link href="#contact" className="rounded-full border border-blue-200 px-3 py-2 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-50 sm:px-4 sm:text-xs">
               Contact
             </Link>
           </div>
